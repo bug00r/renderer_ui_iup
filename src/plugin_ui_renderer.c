@@ -145,10 +145,10 @@ static void create_test_renderer()
 	  render_ctx->n = 1.f;
 	  scene_t * scene;
 	  //scene = scene_create_triangle();
-	  scene = scene_create_test_all();
+	  //scene = scene_create_test_all();
 	  //scene = scene_create_test_cube();
 	  //scene = scene_create_tree();
-	  //scene = scene_create_test();
+	  scene = scene_create_test();
 	  render_ctx->scene = scene;
 	  IupSetGlobal("RCTX", (void*) render_ctx);
 	  config_camera_perspective(&render_ctx->renderer->camera, &render_ctx->from, &render_ctx->to, 
