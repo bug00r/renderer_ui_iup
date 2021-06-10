@@ -107,14 +107,19 @@ static void render_canvas(cdCanvas * _canvas)
 	}
 }
 
-static void render_scene_again_and_refresh_canvas()
-{
-	render_scence_again();
+static void __refresh_canvas() {
 	cdCanvas *canvas = (cdCanvas*)IupGetAttribute(NULL, "RENDERER_CD_CANVAS_DBUFFER");
 	cdCanvasActivate(canvas);
 	render_canvas(canvas);
 	cdCanvasDeactivate(canvas);
 	cdCanvasFlush(canvas);
+}
+
+
+static void render_scene_again_and_refresh_canvas()
+{
+	render_scence_again();
+	__refresh_canvas();
 }
 
 
@@ -132,8 +137,9 @@ static void __color_scene(scene_t* scene) {
 
 }
 
-static void create_test_renderer()
+static render_context_t* create_test_renderer()
 {
+	printf("create_test_renderer\n");
 	render_context_t * render_ctx = malloc(sizeof(render_context_t));
 	render_ctx->bgcolor = (cRGB_t){0.0f, 0.0f, 0.0f};
 	render_ctx->from = (vec3_t){-1.f, 1.5f, -1.5f };
@@ -141,7 +147,7 @@ static void create_test_renderer()
 	render_ctx->to = (vec3_t){0.f, 0.f, 0.f};
 	render_ctx->renderer = renderer_new(512, 512, &render_ctx->bgcolor, 1);
 	render_ctx->renderer->projection = RP_PERSPECTIVE;
-	float view = 4.f;
+	float view = 2.f;
 	render_ctx->l = -view;
 	render_ctx->r = view;
 	render_ctx->t = view;
@@ -157,7 +163,6 @@ static void create_test_renderer()
 	};
 
 	scene = scene_create_waterfall_diagram(&waterfall_data[0], 30, 8);
-	
 
 	//scene = scene_create_triangle();
 	//scene = scene_create_test_all();
@@ -168,57 +173,24 @@ static void create_test_renderer()
 	IupSetGlobal("RCTX", (void*) render_ctx);
 	config_camera_perspective(&render_ctx->renderer->camera, &render_ctx->from, &render_ctx->to, 
 				render_ctx->l, render_ctx->r, render_ctx->t, render_ctx->b, render_ctx->n, render_ctx->f);
-	render_scence_again();
+	render_scene(render_ctx->renderer, scene);
+	return render_ctx;
 }
 
-static render_context_t* create_renderer_context_v1_perspective()
-{
-	  render_context_t * render_ctx = malloc(sizeof(render_context_t));
-	  render_ctx->bgcolor = (cRGB_t){0.0f, 0.0f, 0.0f};
-	  render_ctx->from = (vec3_t){0.f, 0.5f, 1.f };
-	  //render_ctx->from = (vec3_t){0.f, 0.f, 0.480633f };
-	  render_ctx->to = (vec3_t){0.f, 0.f, 0.f};
-	  render_ctx->renderer = renderer_new(512, 512, &render_ctx->bgcolor, 1);
-	  render_ctx->renderer->projection = RP_PERSPECTIVE;
-	  float view = 2.f;
-	  render_ctx->l = -view;
-	  render_ctx->r = view;
-	  render_ctx->t = view;
-	  render_ctx->b = -view;
-	  render_ctx->f = 5.f;
-	  render_ctx->n = 1.f;
-	  scene_t * scene;
-	  //scene = scene_create_triangle();
-	  scene = scene_create_test_all();
-	  //scene = scene_create_test_cube();
-	  //scene = scene_create_tree();
-	  //scene = scene_create_test();
-	  render_ctx->scene = scene;
-	  
-	  config_camera_perspective(&render_ctx->renderer->camera, &render_ctx->from, &render_ctx->to, 
-					render_ctx->l, render_ctx->r, render_ctx->t, render_ctx->b, render_ctx->n, render_ctx->f);
-	
-	  render_scene(render_ctx->renderer, scene);	
-	  return render_ctx;
-}
-
-static int resize_cb(Ihandle *ih, int canvas_w, int canvas_h)
+/*static int resize_cb(Ihandle *ih, int canvas_w, int canvas_h)
 {
 	cdCanvas *canvas = (cdCanvas*)IupGetAttribute(ih, "_CD_CANVAS");
-	cdCanvasActivate(canvas);
+	//cdCanvasActivate(canvas);
 	return IUP_DEFAULT;
-}
+}*/
 
 static int action(Ihandle *ih, float fposx, float fposy)
 {	
-	cdCanvas *canvas = (cdCanvas*)IupGetAttribute(ih, "_CD_CANVAS_DBUFFER");
-	cdCanvasActivate(canvas);
 	if(IupGetInt(NULL, "RENDER_LIVE"))
 	{
-			render_canvas(canvas);
+		__refresh_canvas();
 	}
-	cdCanvasDeactivate(canvas);
-	cdCanvasFlush(canvas); 
+
 	return IUP_DEFAULT;
 }
 
@@ -239,7 +211,7 @@ static Ihandle * create__render_canvas()
 	Ihandle *canvas = IupCanvas(NULL);
 	IupSetAttributes(canvas, "RASTERSIZE=512x512, EXPAND=NO, CANFOCUS=NO");
 	
-	IupSetCallback(canvas, "RESIZE_CB",  (Icallback)resize_cb);
+	//IupSetCallback(canvas, "RESIZE_CB",  (Icallback)resize_cb);
 	IupSetCallback(canvas, "ACTION",  (Icallback)action);
 	IupSetCallback(canvas, "MAP_CB",  (Icallback)map_canvas);
 	IupSetCallback(canvas, "WHEEL_CB",  (Icallback)wheel_cb_canvas);
@@ -253,11 +225,7 @@ static int toggle_live_view(Ihandle * toggle, int state)
 	
 	if(state)
 	{	
-		cdCanvas *canvas = (cdCanvas*)IupGetAttribute(NULL, "RENDERER_CD_CANVAS_DBUFFER");
-		cdCanvasActivate(canvas);
-		render_canvas(canvas);
-		cdCanvasDeactivate(canvas);
-		cdCanvasFlush(canvas);
+		__refresh_canvas();
 	}
 	 
 	return IUP_DEFAULT;
@@ -303,15 +271,7 @@ static int render_view_zoom(float zoom)
 	from->y += normalized.y;
 	from->z += normalized.z;
 	
-	render_scence_again();
-	
-	cdCanvas *canvas = (cdCanvas*)IupGetAttribute(NULL, "RENDERER_CD_CANVAS_DBUFFER");
-	
-	cdCanvasActivate(canvas);
-	render_canvas(canvas);
-	cdCanvasDeactivate(canvas);
-	cdCanvasFlush(canvas);
-
+	render_scene_again_and_refresh_canvas();
 	return IUP_DEFAULT;
 }
 
@@ -427,19 +387,19 @@ static Ihandle * create_render_rotation_options_frame()
 
 Ihandle * create_and_show_dialog()
 {
-	create_test_renderer();
+	render_context_t *render_ctx = create_test_renderer();
+	Ihandle *renderer_1 = create_renderer_context(render_ctx);
+	
 	Ihandle *render_frame = create__render_frame();
 	Ihandle *render_zoom_options_frame = create_render_zoom_options_frame();
 	Ihandle *render_rotation_options_frame = create_render_rotation_options_frame();
 	Ihandle *move_opt_box = IupVbox(render_zoom_options_frame, render_rotation_options_frame, NULL);
 	Ihandle *render_0 = IupHbox( render_frame, move_opt_box, NULL);
 	
-	render_context_t *render_ctx = create_renderer_context_v1_perspective();
-	Ihandle *renderer_1 = create_renderer_context(render_ctx);
-	
+
 	Ihandle *maindlg = IupVbox(render_0, renderer_1, NULL);
+	IupSetAttribute(maindlg, "RCTX", (void*)render_ctx);
 	
-	IupSetAttribute(maindlg, "RCTX1", (void*)render_ctx);
 	
 	return maindlg;
 }
@@ -475,11 +435,6 @@ static void _render_free_(void * data) {
 	printf("render free\n");
 	render_context_t * rctx = (render_context_t *)IupGetGlobal("RCTX");
 	free_render_context(&rctx);
-	
-	render_ctx_t *mctx = (render_ctx_t *)data;
-	render_context_t * rctx1 = (render_context_t *)IupGetAttribute(mctx->frame, "RCTX1");
-	free_render_context(&rctx1);
-	
 }
 
 static const char * _render_name_(void * data) {
@@ -499,7 +454,6 @@ void * _render_frame_(void * data) {
 
 void _render_prepare_(void * data) {
 	printf("handle render prepare\n");
-	render_scence_again();
 	render_scene_again_and_refresh_canvas();
 }
 
