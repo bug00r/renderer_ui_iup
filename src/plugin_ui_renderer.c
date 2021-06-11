@@ -142,12 +142,12 @@ static render_context_t* create_test_renderer()
 	printf("create_test_renderer\n");
 	render_context_t * render_ctx = malloc(sizeof(render_context_t));
 	render_ctx->bgcolor = (cRGB_t){0.0f, 0.0f, 0.0f};
-	render_ctx->from = (vec3_t){-1.f, 1.5f, -1.5f };
-	//render_ctx->from = (vec3_t){0.f, 0.f, 0.480633f };
+	render_ctx->from = (vec3_t){-2.f, 3.f, -1.5f };
+	//render_ctx->from = (vec3_t){-1.f, 1.5f, -1.5f }; //perspective
 	render_ctx->to = (vec3_t){0.f, 0.f, 0.f};
 	render_ctx->renderer = renderer_new(512, 512, &render_ctx->bgcolor, 1);
 	render_ctx->renderer->projection = RP_PERSPECTIVE;
-	float view = 2.f;
+	float view = 4.f;
 	render_ctx->l = -view;
 	render_ctx->r = view;
 	render_ctx->t = view;
