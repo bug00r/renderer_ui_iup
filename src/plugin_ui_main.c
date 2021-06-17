@@ -145,7 +145,7 @@ void * _main_frame_(void * data) {
 		Ihandle * main_box = IupHbox(expand_tree, tabs, NULL);
 		frame = IupDialog(main_box);
 		IupSetAttribute(frame, "TITLE", _main_name_(data));
-		IupSetAttribute(frame, "SIZE", "HALFxHALF");
+		IupSetAttribute(frame, "SIZE", "900xFULL");
 		
 		Ihandle * menu = IupMenu(create_file_menu(), create_plugin_menu(mctx), NULL);
 		IupSetAttributeHandle(frame, "MENU", menu);
