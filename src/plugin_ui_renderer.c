@@ -138,7 +138,7 @@ static render_context_t* create_test_renderer()
 	printf("create_test_renderer\n");
 	render_context_t * render_ctx = malloc(sizeof(render_context_t));
 	render_ctx->bgcolor = (cRGB_t){0.0f, 0.0f, 0.0f};
-	render_ctx->from = (vec3_t){0.f, 0.f, 1.f };
+	render_ctx->from = (vec3_t){0.f, 0.f, 1.5f };
 	//render_ctx->from = (vec3_t){-1.f, 1.5f, -1.5f }; //perspective
 	render_ctx->to = (vec3_t){0.f, 0.f, .0f};
 	render_ctx->renderer = renderer_new(512, 512, &render_ctx->bgcolor, 1);
