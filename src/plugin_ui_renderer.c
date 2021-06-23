@@ -6,6 +6,14 @@ typedef struct {
 	vec3_t from, to;
 	float l,r,t,b,f,n;
 	cRGB_t  bgcolor;
+	Ihandle* cam_from[3];
+	Ihandle* cam_to[3];
+	Ihandle* cam_left[3];
+	Ihandle* cam_up[3];
+	Ihandle* cam_forward[3];
+	Ihandle* mat4_view[16];
+	Ihandle* mat4_proj[16];
+	Ihandle* mat4_trans[16];
 } render_context_t;
 
 
@@ -70,6 +78,46 @@ static void convertFramebuffer_iupCanvas(renderer_t * renderer, cdCanvas * canva
     }
 }
 
+static void update_debug_mat4(Ihandle **targets, mat4_t *data) {
+	IupSetFloat(targets[0], "TITLE", data->_11);
+	IupSetFloat(targets[1], "TITLE", data->_12);
+	IupSetFloat(targets[2], "TITLE", data->_13);
+	IupSetFloat(targets[3], "TITLE", data->_14);
+	IupSetFloat(targets[4], "TITLE", data->_21);
+	IupSetFloat(targets[5], "TITLE", data->_22);
+	IupSetFloat(targets[6], "TITLE", data->_23);
+	IupSetFloat(targets[7], "TITLE", data->_24);
+	IupSetFloat(targets[8], "TITLE", data->_31);
+	IupSetFloat(targets[9], "TITLE", data->_32);
+	IupSetFloat(targets[10], "TITLE", data->_33);
+	IupSetFloat(targets[11], "TITLE", data->_34);
+	IupSetFloat(targets[12], "TITLE", data->_41);
+	IupSetFloat(targets[13], "TITLE", data->_42);
+	IupSetFloat(targets[14], "TITLE", data->_43);
+	IupSetFloat(targets[15], "TITLE", data->_44);
+}
+
+static void update_debug_vec3(Ihandle **targets, vec3_t *data) {
+	IupSetFloat(targets[0], "TITLE", data->x);
+	IupSetFloat(targets[1], "TITLE", data->y);
+	IupSetFloat(targets[2], "TITLE", data->z);
+}
+
+static void update_debug_view(renderer_t* renderer) {
+	camera_t *cam = &renderer->camera;
+	render_context_t * rctx = (render_context_t *)IupGetGlobal("RCTX");
+
+	update_debug_vec3(&rctx->cam_from[0], &cam->from);
+	update_debug_vec3(&rctx->cam_to[0], &cam->to);
+	update_debug_vec3(&rctx->cam_left[0], &cam->left);
+	update_debug_vec3(&rctx->cam_up[0], &cam->up);
+	update_debug_vec3(&rctx->cam_forward[0], &cam->forward);
+
+	update_debug_mat4(&rctx->mat4_view[0], &cam->view);
+	update_debug_mat4(&rctx->mat4_proj[0], &cam->projection);
+	update_debug_mat4(&rctx->mat4_trans[0], &cam->transformation);
+}
+
 void render_scence_again()
 {
 	render_context_t * rctx = (render_context_t *)IupGetGlobal("RCTX");
@@ -83,7 +131,8 @@ void render_scence_again()
 
 	mat4_mul_dest(&curcam->transformation ,&curcam->view, &curcam->projection);
 	renderer_clear_frame(renderer);
-	render_scene(renderer, scene);	
+	render_scene(renderer, scene);
+	update_debug_view(renderer);
 }
 
 static void render_canvas(cdCanvas * _canvas)
@@ -138,7 +187,7 @@ static render_context_t* create_test_renderer()
 	printf("create_test_renderer\n");
 	render_context_t * render_ctx = malloc(sizeof(render_context_t));
 	render_ctx->bgcolor = (cRGB_t){0.0f, 0.0f, 0.0f};
-	render_ctx->from = (vec3_t){1.f, 1.f, 1.f };
+	render_ctx->from = (vec3_t){1.5f, 1.f, -1.5f };
 	//render_ctx->from = (vec3_t){-1.f, 1.5f, -1.5f }; //perspective
 	render_ctx->to = (vec3_t){0.f, 0.f, .0f};
 	render_ctx->renderer = renderer_new(512, 512, &render_ctx->bgcolor, 1);
@@ -202,6 +251,10 @@ static int wheel_cb_canvas(Ihandle * ih, float delta, int x, int y, char *status
 	return IUP_IGNORE;
 }
 
+int button_cb_canvas(Ihandle* ih, int button, int pressed, int x, int y, char* status) {
+	printf("x: %i, y: %i btn: %i, pressed: %i\n", x, y, button, pressed);
+}
+
 static Ihandle * create__render_canvas()
 {
 	Ihandle *canvas = IupCanvas(NULL);
@@ -210,6 +263,7 @@ static Ihandle * create__render_canvas()
 	//IupSetCallback(canvas, "RESIZE_CB",  (Icallback)resize_cb);
 	IupSetCallback(canvas, "ACTION",  (Icallback)action);
 	IupSetCallback(canvas, "MAP_CB",  (Icallback)map_canvas);
+	IupSetCallback(canvas, "BUTTON_CB",  (Icallback)button_cb_canvas);
 	IupSetCallback(canvas, "WHEEL_CB",  (Icallback)wheel_cb_canvas);
 	
 	return canvas;
@@ -381,7 +435,142 @@ static Ihandle * create_render_rotation_options_frame()
 	return frame;
 }
 
-Ihandle * create_and_show_dialog()
+static void __gbox_set_default_attrs(Ihandle *gbox) {
+	IupSetAttribute(gbox, "ALIGNMENTLIN", "ACENTER");
+	IupSetAttribute(gbox, "MARGIN", "10x10");
+	IupSetAttribute(gbox, "GAPLIN", "5");
+	IupSetAttribute(gbox, "GAPCOL", "5");
+	IupSetAttribute(gbox, "NORMALIZESIZE", "BOTH");
+	IupSetAttribute(gbox, "NORMALIZESIZE", "HORIZONTAL");
+	IupSetAttribute(gbox, "EXPANDCHILDREN", "HORIZONTAL");
+}
+
+Ihandle* create_render_debug_cam_vecs() {
+	
+	Ihandle *handles[] = {
+		IupSetAttributes(IupLabel(""), ""), 
+		IupSetAttributes(IupLabel("x"), "FONTSTYLE=Bold"), 
+		IupSetAttributes(IupLabel("y"), "FONTSTYLE=Bold"), 
+		IupSetAttributes(IupLabel("z"), "FONTSTYLE=Bold"),
+		
+		IupSetAttributes(IupLabel("from"), "FONTSTYLE=Bold"), 
+		/*[5]*/IupSetAttributes(IupLabel("-"), ""), 
+		/*[6]*/IupSetAttributes(IupLabel("-"), ""), 
+		/*[7]*/IupSetAttributes(IupLabel("-"), ""), 
+		
+		IupSetAttributes(IupLabel("to"), "FONTSTYLE=Bold"),
+		/*[9]*/IupSetAttributes(IupLabel("-"), ""), 
+		/*[10]*/IupSetAttributes(IupLabel("-"), ""), 
+		/*[11]*/IupSetAttributes(IupLabel("-"), ""), 
+		
+		IupSetAttributes(IupLabel("forward"), "FONTSTYLE=Bold"), 
+		/*[13]*/IupSetAttributes(IupLabel("-"), ""), 
+		/*[14]*/IupSetAttributes(IupLabel("-"), ""), 
+		/*[15]*/IupSetAttributes(IupLabel("-"), ""), 
+
+		IupSetAttributes(IupLabel("left"), "FONTSTYLE=Bold"), 
+		/*[17]*/IupSetAttributes(IupLabel("-"), ""), 
+		/*[18]*/IupSetAttributes(IupLabel("-"), ""), 
+		/*[19]*/IupSetAttributes(IupLabel("-"), ""), 
+
+
+		IupSetAttributes(IupLabel("up"), "FONTSTYLE=Bold"),
+		/*[21]*/IupSetAttributes(IupLabel("-"), "HANDLENAME=up_x"), 
+		/*[22]*/IupSetAttributes(IupLabel("-"), "HANDLENAME=up_y"), 
+		/*[23]*/IupSetAttributes(IupLabel("-"), "HANDLENAME=up_z"),
+		NULL
+	};
+
+	render_context_t * rctx = (render_context_t *)IupGetGlobal("RCTX");
+	rctx->cam_from[0] = handles[5]; rctx->cam_from[1] = handles[6]; rctx->cam_from[2] = handles[7];
+	rctx->cam_to[0] = handles[9]; rctx->cam_to[1] = handles[10]; rctx->cam_to[2] = handles[11];
+	rctx->cam_forward[0] = handles[13]; rctx->cam_forward[1] = handles[14]; rctx->cam_forward[2] = handles[15];
+	rctx->cam_left[0] = handles[17]; rctx->cam_left[1] = handles[18]; rctx->cam_left[2] = handles[19];
+	rctx->cam_up[0] = handles[21]; rctx->cam_up[1] = handles[22]; rctx->cam_up[2] = handles[23];
+
+	Ihandle *frame = IupGridBoxv( &handles[0] );
+	
+	IupSetAttribute(frame, "NUMDIV", "4");
+	__gbox_set_default_attrs(frame);
+	return IupSetAttributes(IupFrame(frame), "TITLE=Camera-Vectors");
+}
+
+Ihandle *create_render_debug_cam_mat4(const char* title, Ihandle **save_handles) {
+	Ihandle *handles[] = {
+		IupSetAttributes(IupLabel(""), ""), 
+		IupSetAttributes(IupLabel("1"), "FONTSTYLE=Bold"), 
+		IupSetAttributes(IupLabel("2"), "FONTSTYLE=Bold"), 
+		IupSetAttributes(IupLabel("3"), "FONTSTYLE=Bold"),
+		IupSetAttributes(IupLabel("4"), "FONTSTYLE=Bold"),
+		
+		IupSetAttributes(IupLabel("1"), "FONTSTYLE=Bold"), 
+		/*[6]*/IupSetAttributes(IupLabel("-"), ""), 
+		/*[7]*/IupSetAttributes(IupLabel("-"), ""), 
+		/*[8]*/IupSetAttributes(IupLabel("-"), ""), 
+		/*[9]*/IupSetAttributes(IupLabel("-"), ""), 
+		
+		IupSetAttributes(IupLabel("2"), "FONTSTYLE=Bold"),
+		/*[11]*/IupSetAttributes(IupLabel("-"), ""), 
+		/*[12]*/IupSetAttributes(IupLabel("-"), ""), 
+		/*[13]*/IupSetAttributes(IupLabel("-"), ""), 
+		/*[14]*/IupSetAttributes(IupLabel("-"), ""), 
+		
+		IupSetAttributes(IupLabel("3"), "FONTSTYLE=Bold"), 
+		/*[16]*/IupSetAttributes(IupLabel("-"), ""), 
+		/*[17]*/IupSetAttributes(IupLabel("-"), ""), 
+		/*[18]*/IupSetAttributes(IupLabel("-"), ""), 
+		/*[19]*/IupSetAttributes(IupLabel("-"), ""), 
+
+		IupSetAttributes(IupLabel("4"), "FONTSTYLE=Bold"), 
+		/*[21]*/IupSetAttributes(IupLabel("-"), ""), 
+		/*[22]*/IupSetAttributes(IupLabel("-"), ""), 
+		/*[23]*/IupSetAttributes(IupLabel("-"), ""), 
+		/*[24]*/IupSetAttributes(IupLabel("-"), ""), 
+		NULL
+	};
+
+	Ihandle ** hnd = save_handles;
+	hnd[0] = handles[6]; hnd[1] = handles[7]; hnd[2] = handles[8]; hnd[3] = handles[9];
+	hnd[4] = handles[11]; hnd[5] = handles[12]; hnd[6] = handles[13]; hnd[7] = handles[14];
+	hnd[8] = handles[16]; hnd[9] = handles[17]; hnd[10] = handles[18]; hnd[11] = handles[19];
+	hnd[12] = handles[21]; hnd[13] = handles[22]; hnd[14] = handles[23]; hnd[15] = handles[24];
+
+	Ihandle *frame = IupGridBoxv( &handles[0] );
+
+	IupSetAttribute(frame, "NUMDIV", "5");
+	__gbox_set_default_attrs(frame);
+	Ihandle *mat_frame = IupFrame(frame);
+	IupSetAttribute(mat_frame, "TITLE", title);
+	return mat_frame;
+}
+
+/*
+	Ihandle* mat4_view[16];
+	Ihandle* mat4_proj[16];
+	Ihandle* mat4_trans[16];
+*/
+Ihandle* create_render_debug_view_frame() {
+
+	render_context_t * rctx = (render_context_t *)IupGetGlobal("RCTX");
+
+	Ihandle *frame = IupGridBox(
+		create_render_debug_cam_vecs(),
+		create_render_debug_cam_mat4("View Matrix", &rctx->mat4_view[0]),
+		create_render_debug_cam_mat4("Projection Matrix", &rctx->mat4_proj[0]),
+		create_render_debug_cam_mat4("Transformation Matrix", &rctx->mat4_trans[0]),
+		NULL
+	);
+
+	IupSetAttribute(frame, "NUMDIV", "2");
+	__gbox_set_default_attrs(frame);
+	//cam vector matrix from, to, forward left up  : label x y z
+
+	//view matrix
+	//projection matrix
+	return frame;
+}
+
+Ihandle* create_and_show_dialog()
 {
 	render_context_t *render_ctx = create_test_renderer();
 	Ihandle *renderer_1 = create_renderer_context(render_ctx);
@@ -389,13 +578,14 @@ Ihandle * create_and_show_dialog()
 	Ihandle *render_frame = create__render_frame();
 	Ihandle *render_zoom_options_frame = create_render_zoom_options_frame();
 	Ihandle *render_rotation_options_frame = create_render_rotation_options_frame();
-	Ihandle *move_opt_box = IupVbox(render_zoom_options_frame, render_rotation_options_frame, NULL);
+	Ihandle *render_debug_view_frame = create_render_debug_view_frame();
+	Ihandle *move_opt_box = IupVbox(render_zoom_options_frame, render_rotation_options_frame, render_debug_view_frame, NULL);
 	Ihandle *render_0 = IupHbox( render_frame, move_opt_box, NULL);
 	
 
 	Ihandle *maindlg = IupVbox(render_0, renderer_1, NULL);
+
 	IupSetAttribute(maindlg, "RCTX", (void*)render_ctx);
-	
 	
 	return maindlg;
 }
@@ -473,7 +663,7 @@ plugin_t * render_plugin(plugin_t * plugin) {
 	plugin->free = _render_free_;
 	plugin->prepare = _render_prepare_;
 	plugin->cleanup = _render_cleanup_;
-	plugin->data = malloc(sizeof(render_ctx_t));;
+	plugin->data = malloc(sizeof(render_ctx_t));
 	return plugin;
 }
 
