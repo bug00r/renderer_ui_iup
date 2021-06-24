@@ -76,6 +76,9 @@ static void convertFramebuffer_iupCanvas(renderer_t * renderer, cdCanvas * canva
 									 ((unsigned char)(fc.b * 255.f)));
 	  }
     }
+
+
+
 }
 
 static void update_debug_mat4(Ihandle **targets, mat4_t *data) {
@@ -144,6 +147,24 @@ static void render_canvas(cdCanvas * _canvas)
 	if ( canvas != NULL && renderer != NULL)
 	{
 		convertFramebuffer_iupCanvas(renderer, canvas);
+		
+		scene_t *scene = rctx->scene;
+		cdCanvasSetForeground(canvas, cdEncodeColorAlpha(255, 255, 255, 255));
+		for (int curMesh = 0; curMesh < scene->cntMesh; curMesh++) {
+			mesh_t *mesh = scene->meshes[curMesh];
+
+			for (int curShape = 0; curShape < mesh->cntShapes; curShape++) {
+				shape_t *shape = mesh->shapes[curShape];
+				if ( shape->cntVertex == 1 ) {
+					vertex_t *v = shape->vertices[0];
+					vec3_t *raster = &v->info.raster;
+
+					cdCanvasText(canvas, (int)raster->x, cdCanvasInvertYAxis(canvas, (int)raster->y), "2");
+				}
+			}
+
+		}
+		
 	} 
 	else 
 	{
@@ -186,18 +207,18 @@ static render_context_t* create_test_renderer()
 {
 	printf("create_test_renderer\n");
 	render_context_t * render_ctx = malloc(sizeof(render_context_t));
-	render_ctx->bgcolor = (cRGB_t){0.0f, 0.0f, 0.0f};
-	render_ctx->from = (vec3_t){1.5f, 1.f, -1.5f };
+	render_ctx->bgcolor = (cRGB_t){0.7f, 0.7f, 0.7f};
+	render_ctx->from = (vec3_t){-3.5f, 3.f, -4.5f };
 	//render_ctx->from = (vec3_t){-1.f, 1.5f, -1.5f }; //perspective
-	render_ctx->to = (vec3_t){0.f, 0.f, .0f};
+	render_ctx->to = (vec3_t){0.f, -1.f, .0f};
 	render_ctx->renderer = renderer_new(512, 512, &render_ctx->bgcolor, 1);
 	render_ctx->renderer->projection = RP_PERSPECTIVE;
-	float view = 4.f;
+	float view = 3.5f;
 	render_ctx->l = -view;
 	render_ctx->r = view;
 	render_ctx->t = view;
 	render_ctx->b = -view;
-	render_ctx->f = 2.f;
+	render_ctx->f = 5.f;
 	render_ctx->n = .003f;
 	scene_t * scene;
 	float waterfall_data[240] = { 
