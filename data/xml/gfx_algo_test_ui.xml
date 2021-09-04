@@ -1,50 +1,184 @@
-<param-vbox >
+<vbox >
     <attr name="MARGIN" value="5x5" />
     <split>
+        <attr name="MINMAX" value="50:100" />
         <frame>
-            <attr name="TITLE" value="Xml - Source" />
+            <attr name="TITLE" value="Algorithm" />
             <vbox>
-                <text name="xml">
+                <list name="algolist">
                     <attr name="EXPAND" value="YES" />
-                    <attr name="MULTILINE" value="YES" />
-                    <attr name="WORDWRAP" value="YES" />
-                    <callback event="CARET_CB" name="caretclb" />
-                    <handle name="line" />
-                    <handle name="pos" />
-                    <handle name="col" />
-                </text>
-                <hbox>
-                    <label>
-                        <attr name="TITLE" value="line: "/>
-                    </label>
-                    <label name="line"><attrs value='TITLE=-, RASTERSIZE=30' /></label>
-                    <label><attr name="TITLE" value="Col: "/></label>
-                    <label name="col"><attrs value='TITLE=-, RASTERSIZE=30' /></label>
-                    <label><attr name="TITLE" value="Pos: "/></label>
-                    <label name="pos"><attrs value='TITLE=-, EXPAND=HORIZONTAL' /></label>
-                </hbox>
+                    <attr name="1" value="2D Line" />
+                    <attr name="2" value="2D Circle" />
+                    <attr name="3" value="2D Ellipse" />
+                    <attr name="VALUE" value="1" />
+                    <callback event="ACTION" name="on_gfx_algo_changed" />
+                    <handle name="algoparameter" />
+                    <userdata name="GFXCTX" value="GFXCTX" />
+                </list>
             </vbox>
         </frame>
-        <vbox>
-            <attr name="ALIGNMENT" value="ACENTER" />
-            <button>
-                <attr name="ALIGNMENT" value="ACENTER" />
-                <attr name="TITLE" value="PREVIEW" />
-                <attr name="RASTERSIZE" value="100" />
-                <handle name="xml" />
-                <handle name="log" />
-                <callback event="ACTION" name="previewclb" />
-            </button>
+        <split>
+            <attr name="MINMAX" value="200:1000" />
+            <attr name="VALUE" value="200" />
             <frame>
-                <text name="log">
-                    <attr name="EXPAND" value="YES" />
-                    <attr name="MULTILINE" value="YES" />
-                    <attr name="WORDWRAP" value="YES" />
-                    <attr name="APPENDNEWLINE" value="NO" />
-                </text>
-                <attr name="TITLE" value="Logging" />
+                <attr name="TITLE" value="Algorithm Parameter" />
+                <vbox>
+                    <attr name="GAP" value="5" />
+                    <zbox name="algoparameter">
+                        <gridbox name="gfx_algo_1" >
+
+                            <userdata name="drawtrigger" value="drawlinetrigger" />
+                            <handle name="lx0" />
+                            <handle name="lx1" />
+                            <handle name="ly0" />
+                            <handle name="ly1" />
+                            <handle name="gfx_canvas" />
+
+                            <attr name="NAME" value="gfx_algo_1" />
+                            <attr name="NUMDIV" value="5" />
+                            <attr name="GAPLIN" value="5" />
+                            <attr name="GAPCOL" value="5" />
+                            <attr name="EXPANDCHILDREN" value="HORIZONTAL" />
+                            <label>
+                                <attrs value='TITLE="Start:"' />
+                            </label>
+                            <label>
+                                <attrs value='TITLE="x:"' />
+                            </label>
+                            <text name="lx0">
+                                <attrs value='SPIN="YES",MASK="IUP_MASK_UINT",SPINMAX="1000"' />
+                            </text>
+                            <label>
+                                <attrs value='TITLE="y:"' />
+                            </label>
+                            <text name="ly0">
+                                <attrs value='SPIN="YES",MASK="IUP_MASK_UINT",SPINMAX="1000"' />
+                            </text>
+                            <label>
+                                <attrs value='TITLE="End:"' />
+                            </label>
+                            <label>
+                                <attrs value='TITLE="x:"' />
+                            </label>
+                            <text name="lx1">
+                                <attrs value='SPIN="YES",MASK="IUP_MASK_UINT",SPINMAX="1000"' />
+                            </text>
+                            <label>
+                                <attrs value='TITLE="y:"' />
+                            </label>
+                            <text name="ly1">
+                                <attrs value='SPIN="YES",MASK="IUP_MASK_UINT",SPINMAX="1000"' />
+                            </text>
+                        </gridbox>
+                        <gridbox>
+                            
+                            <userdata name="drawtrigger" value="drawcircletrigger" />
+                            
+                            <handle name="cr" />
+                            <handle name="cx" />
+                            <handle name="cy" />
+                            <handle name="gfx_canvas" />
+
+                            <attr name="NAME" value="gfx_algo_2" />
+                            <attr name="NUMDIV" value="5" />
+                            <attr name="GAPLIN" value="5" />
+                            <attr name="GAPCOL" value="5" />
+                            <attr name="EXPANDCHILDREN" value="HORIZONTAL" />
+                            <label>
+                                <attrs value='TITLE="Center:"' />
+                            </label>
+                            <label>
+                                <attrs value='TITLE="x:"' />
+                            </label>
+                            <text name="cx">
+                                <attrs value='SPIN="YES",MASK="IUP_MASK_UINT",SPINMAX="1000"' />
+                            </text>
+                            <label>
+                                <attrs value='TITLE="y:"' />
+                            </label>
+                            <text name="cy">
+                                <attrs value='SPIN="YES",MASK="IUP_MASK_UINT",SPINMAX="1000"' />
+                            </text>
+                            <label>
+                                <attrs value='TITLE="Radius:"' />
+                            </label> 
+                            <label>
+                                <attrs value='TITLE=""' />
+                            </label>
+                            <text name="cr">
+                                <attrs value='SPIN="YES",MASK="IUP_MASK_UINT",SPINMAX="1000"' />
+                            </text> 
+                        </gridbox>
+                        <gridbox>
+
+                            <userdata name="drawtrigger" value="drawellipsetrigger" />
+
+                            <handle name="ex" />
+                            <handle name="ey" />
+                            <handle name="ea" />
+                            <handle name="eb" />
+                            <handle name="gfx_canvas" />
+
+                            <attr name="NAME" value="gfx_algo_3" />
+                            <attr name="NUMDIV" value="5" />
+                            <attr name="GAPLIN" value="5" />
+                            <attr name="GAPCOL" value="5" />
+                            <attr name="EXPANDCHILDREN" value="HORIZONTAL" />
+                            <label>
+                                <attrs value='TITLE="Center:"' />
+                            </label>
+                            <label>
+                                <attrs value='TITLE="x:"' />
+                            </label>
+                            <text name="ex">
+                                <attrs value='SPIN="YES",MASK="IUP_MASK_UINT",SPINMAX="1000"' />
+                            </text>
+                            <label>
+                                <attrs value='TITLE="y:"' />
+                            </label>
+                            <text name="ey">
+                                <attrs value='SPIN="YES",MASK="IUP_MASK_UINT",SPINMAX="1000"' />
+                            </text>
+                            <label>
+                                <attrs value='TITLE="Half Axis:"' />
+                            </label>
+                            <label>
+                                <attrs value='TITLE="a:"' />
+                            </label>
+                            <text name="ea">
+                                <attrs value='SPIN="YES",MASK="IUP_MASK_UINT",SPINMAX="1000"' />
+                            </text>
+                            <label>
+                                <attrs value='TITLE="b:"' />
+                            </label>
+                            <text name="eb">
+                                <attrs value='SPIN="YES",MASK="IUP_MASK_UINT",SPINMAX="1000"' />
+                            </text>
+                        </gridbox>
+                    </zbox>
+                    <button>
+                        <callback event="ACTION" name="on_gfx_trigger_drawing" />
+                        <userdata name="GFXCTX" value="GFXCTX" />
+                        <handle name="gfx_canvas" />
+                        <attrs value='TITLE="draw",EXPAND=HORIZONTAL' />
+                    </button>
+                </vbox>
             </frame>
-        </vbox>
-        <attr name="ORIENTATION" value="HORIZONTAL" />  
+            <frame>
+                <attr name="TITLE" value="Rendering Output" />
+                <vbox>
+                    <canvas name="gfx_canvas">
+                        <callback event="WHEEL_CB" name="gfx_algo_test_wheel_cb_canvas" />
+                        <callback event="MAP_CB" name="gfx_algo_test_map_canvas" />
+                        <param-null />
+                    </canvas>
+                    <button>
+                        <callback event="ACTION" name="on_gfx_trigger_clear_canvas" />
+                        <handle name="gfx_canvas" />
+                        <attrs value='TITLE="clear canvas",EXPAND=HORIZONTAL' />
+                    </button>
+                </vbox>
+            </frame>
+        </split>  
     </split>
-</param-vbox >
+</vbox>

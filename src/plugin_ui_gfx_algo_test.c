@@ -27,6 +27,109 @@ static const char * _gfx_algo_test_name_(void * data) {
 	return "GFX Algo Tests 0.1";
 }
 
+
+int on_gfx_algo_changed(Ihandle *ih, char *text, int item, int state) {
+	
+	/* item selected with 1, 0 means deselected */
+	if ( state == 1 ) {
+		printf("%s\n", text);
+		Ihandle *algoparam = (Ihandle *)IupGetAttribute(ih, "algoparameter");
+		gfx_algo_test_ctx_t *ctx = (gfx_algo_test_ctx_t *)IupGetAttribute(ih, "GFXCTX");
+		
+		if ( algoparam != NULL && ctx != NULL ) {
+			printf("set cur algo\n");
+			IupSetInt(algoparam, "VALUEPOS", item - 1);
+			ctx->cur_algo = IupGetAttributeHandle(algoparam, "VALUE");
+		}
+	}
+	
+	return IUP_DEFAULT;
+}
+
+static void gfx_draw_on_canvas(int32_t const * const x, int32_t const * const y, void *data) {
+	cdCanvasPixel((cdCanvas *)data, *x, cdCanvasInvertYAxis((cdCanvas *)data, *y), 0);
+}
+
+static void _gfx_algo_test_draw_line_trigger(Ihandle *_ih) {
+	Ihandle *ih = _ih;
+
+	vec2_t start = { IupGetInt((Ihandle *)IupGetAttribute(ih, "lx0"), "SPINVALUE"), IupGetInt((Ihandle *)IupGetAttribute(ih, "ly0"), "SPINVALUE") };
+	vec2_t end = { IupGetInt((Ihandle *)IupGetAttribute(ih, "lx1"), "SPINVALUE"), IupGetInt((Ihandle *)IupGetAttribute(ih, "ly1"), "SPINVALUE") };
+
+	void * data = IupGetAttribute((Ihandle*)IupGetAttribute(ih, "gfx_canvas"), "GFX_TEST_CD_CANVAS_DBUFFER");
+	geometry_line(&start, &end, gfx_draw_on_canvas, data);
+}
+
+static void _gfx_algo_test_draw_circle_trigger(Ihandle *_ih) {
+	Ihandle *ih = _ih;
+
+	vec2_t center = { IupGetInt((Ihandle *)IupGetAttribute(ih, "cx"), "SPINVALUE"), IupGetInt((Ihandle *)IupGetAttribute(ih, "cy"), "SPINVALUE") };
+	int32_t radius = IupGetInt((Ihandle *)IupGetAttribute(ih, "cr"), "SPINVALUE");
+ 
+	void * data = IupGetAttribute((Ihandle*)IupGetAttribute(ih, "gfx_canvas"), "GFX_TEST_CD_CANVAS_DBUFFER");
+
+	geometry_circle(&center, &radius, gfx_draw_on_canvas, data);
+
+}
+
+static void _gfx_algo_test_draw_ellipse_trigger(Ihandle *_ih) {
+	
+	Ihandle *ih = _ih;
+
+	vec2_t center = { IupGetInt((Ihandle *)IupGetAttribute(ih, "ex"), "SPINVALUE"), IupGetInt((Ihandle *)IupGetAttribute(ih, "ey"), "SPINVALUE") };
+	int32_t a = IupGetInt((Ihandle *)IupGetAttribute(ih, "ea"), "SPINVALUE");
+	int32_t b = IupGetInt((Ihandle *)IupGetAttribute(ih, "eb"), "SPINVALUE");
+ 
+	void * data = IupGetAttribute((Ihandle*)IupGetAttribute(ih, "gfx_canvas"), "GFX_TEST_CD_CANVAS_DBUFFER");
+
+	geometry_ellipse(&center, &a, &b, gfx_draw_on_canvas, data);
+
+}
+
+static int on_gfx_trigger_drawing(Ihandle* ih) {
+
+	gfx_algo_test_ctx_t *ctx = (gfx_algo_test_ctx_t *)IupGetAttribute(ih, "GFXCTX");
+
+	if ( ctx != NULL && ctx->cur_algo != NULL ) {
+		DRAW_TRIGGER trigger = (DRAW_TRIGGER)IupGetAttribute(ctx->cur_algo, "drawtrigger");
+		if ( trigger != NULL ) {
+			cdCanvas *canvas = (cdCanvas*)IupGetAttribute((Ihandle*)IupGetAttribute(ih, "gfx_canvas"), "GFX_TEST_CD_CANVAS_DBUFFER");
+			cdCanvasActivate(canvas);
+			trigger(ctx->cur_algo);
+			cdCanvasDeactivate(canvas);
+			cdCanvasFlush(canvas);
+			
+		}
+	}
+
+	return IUP_DEFAULT;
+}
+
+static int on_gfx_trigger_clear_canvas(Ihandle* ih) {
+	cdCanvas *canvas = (cdCanvas*)IupGetAttribute((Ihandle*)IupGetAttribute(ih, "gfx_canvas"), "GFX_TEST_CD_CANVAS_DBUFFER");
+
+	cdCanvasActivate(canvas);
+	cdCanvasClear(canvas);
+	cdCanvasDeactivate(canvas);
+	cdCanvasFlush(canvas);
+	
+
+	return IUP_DEFAULT;
+}
+
+static void _gfx_algo_test_map_canvas(Ihandle * ih)
+{
+	cdCanvas * cd_canvas = cdCreateCanvas(CD_IUPDBUFFERRGB, ih);
+	printf("INIT CANVAS %p\n", cd_canvas);
+	IupSetAttribute(ih, "GFX_TEST_CD_CANVAS_DBUFFER", (void*)cd_canvas);
+
+}
+
+static int _gfx_algo_test_wheel_cb_canvas(Ihandle * ih, float delta, int x, int y, char *status)
+{
+	return IUP_IGNORE;
+}
+
 void * _gfx_algo_test_frame_(void * data) {
 
 	#if debug > 0
@@ -44,14 +147,24 @@ void * _gfx_algo_test_frame_(void * data) {
 
 		iup_xml_builder_add_bytes(builder, "gfx_algo_test_ui",  (const char *)xml_src->src_data, *xml_src->src_size);
 
-		//iup_xml_builder_add_callback(builder, "previewclb", (Icallback)_iup_xb_prev_show_preview);
-		//iup_xml_builder_add_callback(builder, "caretclb", (Icallback)on_xml_src_caret_changed);
+		iup_xml_builder_add_callback(builder, "on_gfx_algo_changed", (Icallback)on_gfx_algo_changed);
+		iup_xml_builder_add_callback(builder, "on_gfx_trigger_drawing", (Icallback)on_gfx_trigger_drawing);
+		iup_xml_builder_add_callback(builder, "on_gfx_trigger_clear_canvas", (Icallback)on_gfx_trigger_clear_canvas);
+		iup_xml_builder_add_callback(builder, "gfx_algo_test_wheel_cb_canvas", (Icallback)_gfx_algo_test_wheel_cb_canvas);
+		iup_xml_builder_add_callback(builder, "gfx_algo_test_map_canvas", (Icallback)_gfx_algo_test_map_canvas);
+
+		iup_xml_builder_add_user_data(builder, "GFXCTX", (void*)mctx);
+		iup_xml_builder_add_user_data(builder, "drawlinetrigger", (void*)_gfx_algo_test_draw_line_trigger);
+		iup_xml_builder_add_user_data(builder, "drawcircletrigger", (void*)_gfx_algo_test_draw_circle_trigger);
+		iup_xml_builder_add_user_data(builder, "drawellipsetrigger", (void*)_gfx_algo_test_draw_ellipse_trigger);
 
 		iup_xml_builder_parse(builder);
 
 		Ihandle *mres = iup_xml_builder_get_result(builder, "gfx_algo_test_ui");
 
 		mctx->frame = iup_xml_builder_get_main(mres);
+		mctx->cur_algo = iup_xml_builder_get_name(mres, "gfx_algo_1");
+		if ( mctx->cur_algo == NULL ) printf("MISSING INIT ALGO!!!"); 
 	}
 	
 	return mctx->frame;
