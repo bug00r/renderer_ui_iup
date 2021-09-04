@@ -1,0 +1,50 @@
+<param-vbox >
+    <attr name="MARGIN" value="5x5" />
+    <split>
+        <frame>
+            <attr name="TITLE" value="Xml - Source" />
+            <vbox>
+                <text name="xml">
+                    <attr name="EXPAND" value="YES" />
+                    <attr name="MULTILINE" value="YES" />
+                    <attr name="WORDWRAP" value="YES" />
+                    <callback event="CARET_CB" name="caretclb" />
+                    <handle name="line" />
+                    <handle name="pos" />
+                    <handle name="col" />
+                </text>
+                <hbox>
+                    <label>
+                        <attr name="TITLE" value="line: "/>
+                    </label>
+                    <label name="line"><attrs value='TITLE=-, RASTERSIZE=30' /></label>
+                    <label><attr name="TITLE" value="Col: "/></label>
+                    <label name="col"><attrs value='TITLE=-, RASTERSIZE=30' /></label>
+                    <label><attr name="TITLE" value="Pos: "/></label>
+                    <label name="pos"><attrs value='TITLE=-, EXPAND=HORIZONTAL' /></label>
+                </hbox>
+            </vbox>
+        </frame>
+        <vbox>
+            <attr name="ALIGNMENT" value="ACENTER" />
+            <button>
+                <attr name="ALIGNMENT" value="ACENTER" />
+                <attr name="TITLE" value="PREVIEW" />
+                <attr name="RASTERSIZE" value="100" />
+                <handle name="xml" />
+                <handle name="log" />
+                <callback event="ACTION" name="previewclb" />
+            </button>
+            <frame>
+                <text name="log">
+                    <attr name="EXPAND" value="YES" />
+                    <attr name="MULTILINE" value="YES" />
+                    <attr name="WORDWRAP" value="YES" />
+                    <attr name="APPENDNEWLINE" value="NO" />
+                </text>
+                <attr name="TITLE" value="Logging" />
+            </frame>
+        </vbox>
+        <attr name="ORIENTATION" value="HORIZONTAL" />  
+    </split>
+</param-vbox >

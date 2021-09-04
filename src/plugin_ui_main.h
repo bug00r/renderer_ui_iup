@@ -18,6 +18,7 @@
 //plugins
 #include "plugin_ui_renderer.h"
 #include "plugin_ui_texturing.h"
+#include "plugin_ui_gfx_algo_test.h"
 
 typedef struct _main_ctx_ {
 	Ihandle *frame;

@@ -8,7 +8,7 @@ static void _main_init_(void * data) {
 		  */
 	#endif
 	main_ctx_t * mctx = (main_ctx_t *)data;
-	mctx->cntplugins = 2;
+	mctx->cntplugins = 3;
 	mctx->plugins = malloc( mctx->cntplugins * sizeof(plugin_t));
 	
 	plugin_t *plugin = &mctx->plugins[0];
@@ -19,6 +19,10 @@ static void _main_init_(void * data) {
 	texture_plugin(plugin);
 	plugin->init(plugin->data);
 	
+	plugin = &mctx->plugins[2];
+	gfx_algo_test_plugin(plugin);
+	plugin->init(plugin->data);
+
 	mctx->frame=NULL;
 }
 
