@@ -1,4 +1,4 @@
-#MAKE?=mingw32-make
+MAKE?=make
 AR?=ar
 ARFLAGS?=rcs
 PATHSEP?=/
@@ -39,8 +39,6 @@ ifeq ($(OUTPUT),1)
 endif
 
 CFLAGS=-std=c11 -Wpedantic -pedantic-errors -Wall -Wextra -O1 $(debug)
-#-ggdb
-#-pg for profiling 
 
 LIB?=-L/c/dev/lib
 INCLUDE?=-I/c/dev/include -I.
@@ -50,20 +48,13 @@ CFLAGS=-std=c11
 #-ggdb  -mwindows
 #-pg for profiling 
 
-#MATH_ALGORITHM_DIR=$(patsubst %,algorithm/%,fractals noise)
-#MATH_LIB_DIR=$(patsubst %,math/%, $(MATH_ALGORITHM_DIR) statistics utils mat vec)
-#COLLECTION_LIB_DIR=$(patsubst %,collections/%,array)
-#RENDERER_LIB_DIR=renderer scene mesh shape color texture $(MATH_LIB_DIR) $(COLLECTION_LIB_DIR)
-#RENDERER_INCLUDE_DIR=renderer/include scene mesh shape color texture $(MATH_LIB_DIR) $(COLLECTION_LIB_DIR)
-
-#IUP_INCLUDE=$(patsubst %,_third_/tec_tools/%/include/,iup cd im)
 INCLUDEDIR=-I. $(INCLUDE)
-#INCLUDEDIR+=$(patsubst %,-I./../%,$(IUP_INCLUDE) $(RENDERER_INCLUDE_DIR))
+
 
 _SRC_FILES=test_renderer_ui_iup app iup_app plugin plugin_ui_main plugin_ui_renderer_context plugin_ui_renderer plugin_ui_texturing plugin_ui_gfx_algo_test
 TESTSRC=$(patsubst %,src/%,$(patsubst %,%.c,$(_SRC_FILES)))
 TESTSRC+=$(patsubst %,src/%,$(patsubst %,%.h,$(_SRC_FILES)))
-#$(info $$_TESTSRC is [${_TESTSRC}])
+
 TESTBIN=test_renderer_ui_iup.exe
 
 RENDERER_LIBS=iup_xml_builder geometry renderer scene mesh shape texture noise fractals crgb_array farray array color statistics utilsmath mat vec dl_list utils
@@ -76,7 +67,6 @@ CFLAGS+=-DPCRE2_STATIC -DIN_LIBXML
 TESTLIB=$(patsubst %,-l%,$(RENDERER_LIBS) $(IUP_LIBS) $(THIRD_PARTY_LIBS) $(OS_LIBS))
 
 TESTLIBDIR=-L$(BUILDDIR) $(LIB) 
-#$(patsubst %,%/$(BUILDDIR),$(patsubst %,-L./../%,$(RENDERER_LIB_DIR))) -L./../_third_/tec_tools/release/static/ 
 
 RES=zip_resource
 RES_O=$(RES).o
