@@ -15,8 +15,6 @@
 
 #include "plugin.h"
 
-#include "plugin_ui_renderer_context.h"
-
 typedef struct _render_ctx_ {
 	Ihandle *frame;
 } render_ctx_t;

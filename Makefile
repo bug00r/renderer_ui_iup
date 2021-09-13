@@ -51,7 +51,7 @@ CFLAGS=-std=c11
 INCLUDEDIR=-I. $(INCLUDE)
 
 
-_SRC_FILES=test_renderer_ui_iup app iup_app plugin plugin_ui_main plugin_ui_renderer_context plugin_ui_renderer plugin_ui_texturing plugin_ui_gfx_algo_test
+_SRC_FILES=test_renderer_ui_iup app iup_app plugin plugin_ui_main plugin_ui_renderer plugin_ui_texturing plugin_ui_gfx_algo_test
 TESTSRC=$(patsubst %,src/%,$(patsubst %,%.c,$(_SRC_FILES)))
 TESTSRC+=$(patsubst %,src/%,$(patsubst %,%.h,$(_SRC_FILES)))
 

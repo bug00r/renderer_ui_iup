@@ -16,8 +16,6 @@ typedef struct {
 	Ihandle* mat4_trans[16];
 } render_context_t;
 
-
-
 static void convertFramebuffer_iupCanvas(renderer_t * renderer, cdCanvas * canvas) 
 {
 	unsigned int bi=0, samplestart;
@@ -638,7 +636,6 @@ Ihandle* create_render_debug_view_frame() {
 Ihandle* create_and_show_dialog()
 {
 	render_context_t *render_ctx = create_test_renderer();
-	Ihandle *renderer_1 = create_renderer_context(render_ctx);
 	
 	Ihandle *render_frame = create__render_frame();
 	Ihandle *render_zoom_options_frame = create_render_zoom_options_frame();
@@ -649,7 +646,7 @@ Ihandle* create_and_show_dialog()
 	Ihandle *render_0 = IupHbox( render_frame, move_opt_box, NULL);
 	
 
-	Ihandle *maindlg = IupVbox(render_0, renderer_1, NULL);
+	Ihandle *maindlg = IupVbox(render_0, NULL);
 
 	IupSetAttribute(maindlg, "RCTX", (void*)render_ctx);
 	
