@@ -207,7 +207,7 @@ static render_context_t* create_test_renderer()
 	render_context_t * render_ctx = malloc(sizeof(render_context_t));
 	render_ctx->bgcolor = (cRGB_t){0.7f, 0.7f, 0.7f};
 	//render_ctx->from = (vec3_t){-3.5f, 3.f, -4.5f };
-	render_ctx->from = (vec3_t){-1.f, 1.5f, -1.5f }; //perspective
+	render_ctx->from = (vec3_t){0.f, 0.f, 3.5f }; //perspective
 	render_ctx->to = (vec3_t){0.f, 0.f, .0f};
 	render_ctx->renderer = renderer_new(512, 512, &render_ctx->bgcolor, 1);
 	render_ctx->renderer->projection = RP_PERSPECTIVE;
@@ -229,7 +229,8 @@ static render_context_t* create_test_renderer()
 	scene = scene_create_waterfall_diagram(&waterfall_data[0], 30, 8);
 	*/
 	//scene = scene_create_triangle();
-	scene = scene_create_test_all();
+	//scene = scene_create_test_all();
+	scene = scene_create_polys();
 	//scene = scene_create_test_cube();
 	//scene = scene_create_tree();
 	//scene = scene_create_test();
