@@ -34,40 +34,14 @@ static void convertFramebuffer_iupCanvas(renderer_t * renderer, cdCanvas * canva
 	  {
 		fc.r = 0.f, fc.g = 0.f, fc.b = 0.f;
 		samplestart = bi + (i*us);
-		switch (us) {
-			case 8:
-				c = fb + samplestart + 7;
-				fc.r += c->r; fc.g += c->g; fc.b += c->b;
-			case 7:
-				c = fb + samplestart + 6;
-				fc.r += c->r; fc.g += c->g; fc.b += c->b;
-			case 6:
-				c = fb + samplestart + 5;
-				fc.r += c->r; fc.g += c->g; fc.b += c->b;
-			case 5:
-				c = fb + samplestart + 4;
-				fc.r += c->r; fc.g += c->g; fc.b += c->b;
-			case 4:
-				c = fb + samplestart + 3;
-				fc.r += c->r; fc.g += c->g; fc.b += c->b;
-			case 3:
-			    c = fb + samplestart + 2;
-				fc.r += c->r; fc.g += c->g; fc.b += c->b;
-			case 2:
-				c = fb + samplestart + 1;
-				fc.r += c->r; fc.g += c->g; fc.b += c->b;
-			case 1:
-				c = fb + samplestart;
-				fc.r += c->r; fc.g += c->g; fc.b += c->b;
-				break;
+
+		for (unsigned int sample = us; sample--;)
+		{
+			c = fb + samplestart + sample;
+			fc.r += c->r;
+			fc.g += c->g;
+			fc.b += c->b;
 		}
-		//for (unsigned int sample = us; sample--;)
-		//{
-		//	c = fb + samplestart + sample;
-		//	fc.r += c->r;
-		//	fc.g += c->g;
-		//	fc.b += c->b;
-		//}
 		
 		cdCanvasPixel(canvas, i, cj, ((unsigned char)(fc.r * 255.f) << 16) |
 									 ((unsigned char)(fc.g * 255.f) << 8) |
@@ -209,7 +183,7 @@ static render_context_t* create_test_renderer()
 	//render_ctx->from = (vec3_t){-3.5f, 3.f, -4.5f };
 	render_ctx->from = (vec3_t){0.f, 0.f, 3.5f }; //perspective
 	render_ctx->to = (vec3_t){0.f, 0.f, .0f};
-	render_ctx->renderer = renderer_new(512, 512, &render_ctx->bgcolor, 1);
+	render_ctx->renderer = renderer_new(512, 512, &render_ctx->bgcolor, 4);
 	render_ctx->renderer->projection = RP_PERSPECTIVE;
 	float view = 3.5f;
 	render_ctx->l = -view;
@@ -405,7 +379,7 @@ static Ihandle * create_render_zoom_options_frame()
 	vec3_t * from = &rctx->from;
 	float length = vec3_length(from);
 	IupSetFloat(zoomfactor, "MIN", 0.001f);
-	IupSetFloat(zoomfactor, "MAX", length*4);
+	IupSetFloat(zoomfactor, "MAX", length*8);
 	IupSetFloat(zoomfactor, "VALUE", length);
 	IupSetFloat(NULL, "ZOOM", length);
 	IupSetCallback(zoomfactor, "VALUECHANGED_CB",(Icallback)render_view_zoom_factor_changed);
