@@ -224,14 +224,14 @@
 
                             <userdata name="drawtrigger" value="drawbezier2trigger" />
 
-                            <handle name="sx" />
-                            <handle name="sy" />
-                            <handle name="cx" />
-                            <handle name="cy" />
-                            <handle name="cx2" />
-                            <handle name="cy2" />
-                            <handle name="ex" />
-                            <handle name="ey" />
+                            <handle name="b2sx" />
+                            <handle name="b2sy" />
+                            <handle name="b2cx" />
+                            <handle name="b2cy" />
+                            <handle name="b2cx2" />
+                            <handle name="b2cy2" />
+                            <handle name="b2ex" />
+                            <handle name="b2ey" />
                             <handle name="gfx_canvas" />
 
                             <attr name="NAME" value="gfx_algo_5" />
@@ -245,13 +245,13 @@
                             <label>
                                 <attrs value='TITLE="x:"' />
                             </label>
-                            <text name="sx">
+                            <text name="b2sx">
                                 <attrs value='SPIN="YES",MASK="IUP_MASK_UINT",SPINMAX="1000"' />
                             </text>
                             <label>
                                 <attrs value='TITLE="y:"' />
                             </label>
-                            <text name="sy">
+                            <text name="b2sy">
                                 <attrs value='SPIN="YES",MASK="IUP_MASK_UINT",SPINMAX="1000"' />
                             </text>
                             <label>
@@ -260,13 +260,13 @@
                             <label>
                                 <attrs value='TITLE="x:"' />
                             </label>
-                            <text name="cx">
+                            <text name="b2cx">
                                 <attrs value='SPIN="YES",MASK="IUP_MASK_UINT",SPINMAX="1000"' />
                             </text>
                             <label>
                                 <attrs value='TITLE="y:"' />
                             </label>
-                            <text name="cy">
+                            <text name="b2cy">
                                 <attrs value='SPIN="YES",MASK="IUP_MASK_UINT",SPINMAX="1000"' />
                             </text>
                             <label>
@@ -275,13 +275,13 @@
                             <label>
                                 <attrs value='TITLE="x:"' />
                             </label>
-                            <text name="cx2">
+                            <text name="b2cx2">
                                 <attrs value='SPIN="YES",MASK="IUP_MASK_UINT",SPINMAX="1000"' />
                             </text>
                             <label>
                                 <attrs value='TITLE="y:"' />
                             </label>
-                            <text name="cy2">
+                            <text name="b2cy2">
                                 <attrs value='SPIN="YES",MASK="IUP_MASK_UINT",SPINMAX="1000"' />
                             </text>
                              <label>
@@ -290,13 +290,13 @@
                             <label>
                                 <attrs value='TITLE="x:"' />
                             </label>
-                            <text name="ex">
+                            <text name="b2ex">
                                 <attrs value='SPIN="YES",MASK="IUP_MASK_UINT",SPINMAX="1000"' />
                             </text>
                             <label>
                                 <attrs value='TITLE="y:"' />
                             </label>
-                            <text name="ey">
+                            <text name="b2ey">
                                 <attrs value='SPIN="YES",MASK="IUP_MASK_UINT",SPINMAX="1000"' />
                             </text>
                         </gridbox>
