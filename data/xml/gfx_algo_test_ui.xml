@@ -10,6 +10,8 @@
                     <attr name="1" value="2D Line" />
                     <attr name="2" value="2D Circle" />
                     <attr name="3" value="2D Ellipse" />
+                    <attr name="4" value="2D Bezier 1" />
+                    <attr name="5" value="2D Bezier 2" />
                     <attr name="VALUE" value="1" />
                     <callback event="ACTION" name="on_gfx_algo_changed" />
                     <handle name="algoparameter" />
@@ -152,6 +154,149 @@
                                 <attrs value='TITLE="b:"' />
                             </label>
                             <text name="eb">
+                                <attrs value='SPIN="YES",MASK="IUP_MASK_UINT",SPINMAX="1000"' />
+                            </text>
+                        </gridbox>
+                        <gridbox>
+
+                            <userdata name="drawtrigger" value="drawbezier1trigger" />
+
+                            <handle name="bsx" />
+                            <handle name="bsy" />
+                            <handle name="bcx" />
+                            <handle name="bcy" />
+                            <handle name="bex" />
+                            <handle name="bey" />
+                            <handle name="gfx_canvas" />
+
+                            <attr name="NAME" value="gfx_algo_4" />
+                            <attr name="NUMDIV" value="5" />
+                            <attr name="GAPLIN" value="5" />
+                            <attr name="GAPCOL" value="5" />
+                            <attr name="EXPANDCHILDREN" value="HORIZONTAL" />
+                            <label>
+                                <attrs value='TITLE="Start:"' />
+                            </label>
+                            <label>
+                                <attrs value='TITLE="x:"' />
+                            </label>
+                            <text name="bsx">
+                                <attrs value='SPIN="YES",MASK="IUP_MASK_UINT",SPINMAX="1000"' />
+                            </text>
+                            <label>
+                                <attrs value='TITLE="y:"' />
+                            </label>
+                            <text name="bsy">
+                                <attrs value='SPIN="YES",MASK="IUP_MASK_UINT",SPINMAX="1000"' />
+                            </text>
+                            <label>
+                                <attrs value='TITLE="Control:"' />
+                            </label>
+                            <label>
+                                <attrs value='TITLE="x:"' />
+                            </label>
+                            <text name="bcx">
+                                <attrs value='SPIN="YES",MASK="IUP_MASK_UINT",SPINMAX="1000"' />
+                            </text>
+                            <label>
+                                <attrs value='TITLE="y:"' />
+                            </label>
+                            <text name="bcy">
+                                <attrs value='SPIN="YES",MASK="IUP_MASK_UINT",SPINMAX="1000"' />
+                            </text>
+                             <label>
+                                <attrs value='TITLE="End:"' />
+                            </label>
+                            <label>
+                                <attrs value='TITLE="x:"' />
+                            </label>
+                            <text name="bex">
+                                <attrs value='SPIN="YES",MASK="IUP_MASK_UINT",SPINMAX="1000"' />
+                            </text>
+                            <label>
+                                <attrs value='TITLE="y:"' />
+                            </label>
+                            <text name="bey">
+                                <attrs value='SPIN="YES",MASK="IUP_MASK_UINT",SPINMAX="1000"' />
+                            </text>
+                        </gridbox>
+                        <gridbox>
+
+                            <userdata name="drawtrigger" value="drawbezier2trigger" />
+
+                            <handle name="sx" />
+                            <handle name="sy" />
+                            <handle name="cx" />
+                            <handle name="cy" />
+                            <handle name="cx2" />
+                            <handle name="cy2" />
+                            <handle name="ex" />
+                            <handle name="ey" />
+                            <handle name="gfx_canvas" />
+
+                            <attr name="NAME" value="gfx_algo_5" />
+                            <attr name="NUMDIV" value="5" />
+                            <attr name="GAPLIN" value="5" />
+                            <attr name="GAPCOL" value="5" />
+                            <attr name="EXPANDCHILDREN" value="HORIZONTAL" />
+                            <label>
+                                <attrs value='TITLE="Start:"' />
+                            </label>
+                            <label>
+                                <attrs value='TITLE="x:"' />
+                            </label>
+                            <text name="sx">
+                                <attrs value='SPIN="YES",MASK="IUP_MASK_UINT",SPINMAX="1000"' />
+                            </text>
+                            <label>
+                                <attrs value='TITLE="y:"' />
+                            </label>
+                            <text name="sy">
+                                <attrs value='SPIN="YES",MASK="IUP_MASK_UINT",SPINMAX="1000"' />
+                            </text>
+                            <label>
+                                <attrs value='TITLE="Control-1:"' />
+                            </label>
+                            <label>
+                                <attrs value='TITLE="x:"' />
+                            </label>
+                            <text name="cx">
+                                <attrs value='SPIN="YES",MASK="IUP_MASK_UINT",SPINMAX="1000"' />
+                            </text>
+                            <label>
+                                <attrs value='TITLE="y:"' />
+                            </label>
+                            <text name="cy">
+                                <attrs value='SPIN="YES",MASK="IUP_MASK_UINT",SPINMAX="1000"' />
+                            </text>
+                            <label>
+                                <attrs value='TITLE="Control-2:"' />
+                            </label>
+                            <label>
+                                <attrs value='TITLE="x:"' />
+                            </label>
+                            <text name="cx2">
+                                <attrs value='SPIN="YES",MASK="IUP_MASK_UINT",SPINMAX="1000"' />
+                            </text>
+                            <label>
+                                <attrs value='TITLE="y:"' />
+                            </label>
+                            <text name="cy2">
+                                <attrs value='SPIN="YES",MASK="IUP_MASK_UINT",SPINMAX="1000"' />
+                            </text>
+                             <label>
+                                <attrs value='TITLE="End:"' />
+                            </label>
+                            <label>
+                                <attrs value='TITLE="x:"' />
+                            </label>
+                            <text name="ex">
+                                <attrs value='SPIN="YES",MASK="IUP_MASK_UINT",SPINMAX="1000"' />
+                            </text>
+                            <label>
+                                <attrs value='TITLE="y:"' />
+                            </label>
+                            <text name="ey">
                                 <attrs value='SPIN="YES",MASK="IUP_MASK_UINT",SPINMAX="1000"' />
                             </text>
                         </gridbox>

@@ -50,6 +50,14 @@ static void gfx_draw_on_canvas(int32_t const * const x, int32_t const * const y,
 	cdCanvasPixel((cdCanvas *)data, *x, cdCanvasInvertYAxis((cdCanvas *)data, *y), 0);
 }
 
+static void gfx_draw_bezier_on_canvas(vec2_t const * const p1, vec2_t const * const p2, void *data) {
+	//cdCanvasPixel((cdCanvas *)data, *x, cdCanvasInvertYAxis((cdCanvas *)data, *y), 0);
+	printf("draw: ");
+	vec2_print(p1);
+	vec2_print(p2);
+	cdCanvasLine((cdCanvas *)data, (int)p1->x, (int)p1->y, (int)p2->x, (int)p2->y);
+}
+
 static void _gfx_algo_test_draw_line_trigger(Ihandle *_ih) {
 	Ihandle *ih = _ih;
 
@@ -83,6 +91,29 @@ static void _gfx_algo_test_draw_ellipse_trigger(Ihandle *_ih) {
 	void * data = IupGetAttribute((Ihandle*)IupGetAttribute(ih, "gfx_canvas"), "GFX_TEST_CD_CANVAS_DBUFFER");
 
 	geometry_ellipse(&center, &a, &b, gfx_draw_on_canvas, data);
+
+}
+
+static void _gfx_algo_test_draw_bezier1_trigger(Ihandle *_ih) {
+
+	Ihandle *ih = _ih;
+
+	vec2_t start = {IupGetInt((Ihandle *)IupGetAttribute(ih, "bsx"), "SPINVALUE"), IupGetInt((Ihandle *)IupGetAttribute(ih, "bsy"), "SPINVALUE")};
+	vec2_t cp = {IupGetInt((Ihandle *)IupGetAttribute(ih, "bcx"), "SPINVALUE"), IupGetInt((Ihandle *)IupGetAttribute(ih, "bcy"), "SPINVALUE")};
+	vec2_t end = {IupGetInt((Ihandle *)IupGetAttribute(ih, "bex"), "SPINVALUE"), IupGetInt((Ihandle *)IupGetAttribute(ih, "bey"), "SPINVALUE")};
+
+	vec2_print(&start);
+	vec2_print(&cp);
+	vec2_print(&end);
+
+	void * data = IupGetAttribute((Ihandle*)IupGetAttribute(ih, "gfx_canvas"), "GFX_TEST_CD_CANVAS_DBUFFER");
+
+	uint32_t steps = 10;
+	
+	geometry_bezier1(&start, &cp, &end, &steps, gfx_draw_bezier_on_canvas, data);
+}
+
+static void _gfx_algo_test_draw_bezier2_trigger(Ihandle *_ih) {
 
 }
 
@@ -157,6 +188,8 @@ void * _gfx_algo_test_frame_(void * data) {
 		iup_xml_builder_add_user_data(builder, "drawlinetrigger", (void*)_gfx_algo_test_draw_line_trigger);
 		iup_xml_builder_add_user_data(builder, "drawcircletrigger", (void*)_gfx_algo_test_draw_circle_trigger);
 		iup_xml_builder_add_user_data(builder, "drawellipsetrigger", (void*)_gfx_algo_test_draw_ellipse_trigger);
+		iup_xml_builder_add_user_data(builder, "drawbezier1trigger", (void*)_gfx_algo_test_draw_bezier1_trigger);
+		iup_xml_builder_add_user_data(builder, "drawbezier2trigger", (void*)_gfx_algo_test_draw_bezier2_trigger);
 
 		iup_xml_builder_parse(builder);
 
