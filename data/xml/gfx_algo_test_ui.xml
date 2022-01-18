@@ -12,6 +12,7 @@
                     <attr name="3" value="2D Ellipse" />
                     <attr name="4" value="2D Bezier 1" />
                     <attr name="5" value="2D Bezier 2" />
+                    <attr name="6" value="Text Rendering" />
                     <attr name="VALUE" value="1" />
                     <callback event="ACTION" name="on_gfx_algo_changed" />
                     <handle name="algoparameter" />
@@ -299,6 +300,43 @@
                             <text name="b2ey">
                                 <attrs value='SPIN="YES",MASK="IUP_MASK_UINT",SPINMAX="1000"' />
                             </text>
+                        </gridbox>
+                        <gridbox>
+                            <userdata name="drawtrigger" value="rendertexttrigger" />
+
+                            <handle name="rfsize" />
+                            <handle name="rfposy" />
+                            <handle name="rfposx" />
+                            <handle name="rftxt" />
+                            <handle name="gfx_canvas" />
+
+                            <attr name="NAME" value="gfx_algo_6" />
+                            <attr name="NUMDIV" value="2" />
+                            <attr name="GAPLIN" value="5" />
+                            <attr name="GAPCOL" value="5" />
+                            <attr name="EXPANDCHILDREN" value="HORIZONTAL" />
+                            <label>
+                                <attrs value='TITLE="Size:"' />
+                            </label>
+                            <text name="rfsize">
+                                <attrs value='SPIN="YES",MASK="IUP_MASK_UINT",SPINMAX="1000"' />
+                            </text>
+                            <label>
+                                <attrs value='TITLE="x:"' />
+                            </label>
+                            <text name="rfposx">
+                                <attrs value='SPIN="YES",MASK="IUP_MASK_UINT",SPINMAX="1000"' />
+                            </text>
+                            <label>
+                                <attrs value='TITLE="y:"' />
+                            </label>
+                            <text name="rfposy">
+                                <attrs value='SPIN="YES",MASK="IUP_MASK_UINT",SPINMAX="1000"' />
+                            </text>
+                            <label>
+                                <attrs value='TITLE="Text:"' />
+                            </label>
+                            <text name="rftxt"></text>
                         </gridbox>
                     </zbox>
                     <button>

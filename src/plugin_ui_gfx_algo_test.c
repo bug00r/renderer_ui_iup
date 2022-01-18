@@ -125,6 +125,41 @@ static void _gfx_algo_test_draw_bezier2_trigger(Ihandle *_ih) {
 	geometry_bezier2(&start, &cp, &cp2, &end, &steps, gfx_draw_bezier_on_canvas, data);
 }
 
+typedef struct {
+    cdCanvas *canvas;
+    vec2_t charPos;
+} __gfx_algo_render_txt_ctx_t;
+
+static void __rf_text_render_func(float const * const x, float const * const y, void *data)
+{
+    __gfx_algo_render_txt_ctx_t *ctx = data;
+    vec2_t *charPos = &ctx->charPos;
+
+    long used_x = charPos->x + *x;
+    long used_y = charPos->y + *y;
+
+	cdCanvasPixel(ctx->canvas, used_x, used_y, 0);
+}
+
+static void _gfx_algo_test_render_text_trigger(Ihandle *_ih) {
+	Ihandle *ih = _ih;
+
+	float glyphSize = IupGetFloat((Ihandle *)IupGetAttribute(ih, "rfsize"), "SPINVALUE");
+	char* text = IupGetAttribute((Ihandle *)IupGetAttribute(ih, "rftxt"), "VALUE");
+	cdCanvas *canvas = (cdCanvas*)IupGetAttribute((Ihandle*)IupGetAttribute(ih, "gfx_canvas"), "GFX_TEST_CD_CANVAS_DBUFFER");
+
+	rf_provider_t* provider = get_default_provider();
+
+    rf_ctx_t rf_ctx;
+    rfont_init(&rf_ctx, provider);
+
+	vec2_t charPos = { IupGetFloat((Ihandle *)IupGetAttribute(ih, "rfposx"), "SPINVALUE") , 
+					   IupGetFloat((Ihandle *)IupGetAttribute(ih, "rfposy"), "SPINVALUE")};
+	__gfx_algo_render_txt_ctx_t renderCtx = {canvas, charPos}; 
+
+	rfont_raster_text(&rf_ctx, (unsigned char const * const)text, glyphSize, __rf_text_render_func, &renderCtx);
+}
+
 static int on_gfx_trigger_drawing(Ihandle* ih) {
 
 	gfx_algo_test_ctx_t *ctx = (gfx_algo_test_ctx_t *)IupGetAttribute(ih, "GFXCTX");
@@ -198,7 +233,8 @@ void * _gfx_algo_test_frame_(void * data) {
 		iup_xml_builder_add_user_data(builder, "drawellipsetrigger", (void*)_gfx_algo_test_draw_ellipse_trigger);
 		iup_xml_builder_add_user_data(builder, "drawbezier1trigger", (void*)_gfx_algo_test_draw_bezier1_trigger);
 		iup_xml_builder_add_user_data(builder, "drawbezier2trigger", (void*)_gfx_algo_test_draw_bezier2_trigger);
-
+		iup_xml_builder_add_user_data(builder, "rendertexttrigger", (void*)_gfx_algo_test_render_text_trigger);
+		
 		iup_xml_builder_parse(builder);
 
 		Ihandle *mres = iup_xml_builder_get_result(builder, "gfx_algo_test_ui");

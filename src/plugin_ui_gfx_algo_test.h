@@ -16,6 +16,8 @@
 #include "iup_xml_builder.h"
 #include "defs.h"
 #include "geometry.h"
+#include "r_font.h"
+#include "font_provider_default.h"
 
 #include "plugin.h"
 

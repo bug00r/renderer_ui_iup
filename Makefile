@@ -51,13 +51,13 @@ CFLAGS=-std=c11
 INCLUDEDIR=-I. $(INCLUDE)
 
 
-_SRC_FILES=test_renderer_ui_iup app iup_app plugin plugin_ui_main plugin_ui_renderer plugin_ui_texturing plugin_ui_gfx_algo_test
+_SRC_FILES=test_renderer_ui_iup app iup_app plugin plugin_ui_main plugin_ui_renderer plugin_ui_texturing plugin_ui_gfx_algo_test font_provider_default
 TESTSRC=$(patsubst %,src/%,$(patsubst %,%.c,$(_SRC_FILES)))
 TESTSRC+=$(patsubst %,src/%,$(patsubst %,%.h,$(_SRC_FILES)))
 
 TESTBIN=test_renderer_ui_iup.exe
 
-RENDERER_LIBS=iup_xml_builder geometry renderer scene mesh shape texture noise fractals crgb_array farray array color statistics utilsmath mat vec dl_list utils
+RENDERER_LIBS= r_font iup_xml_builder geometry renderer scene mesh shape texture noise fractals crgb_array farray array color statistics utilsmath mat vec dl_list utils
 IUP_LIBS=cdcontextplus gdiplus im iupcd iup cd
 THIRD_PARTY_LIBS=exslt xslt xml2 archive zstd lzma z lz4 bz2 freetype6 iconv pcre2-8
 OS_LIBS=kernel32 user32 gdi32 winspool comdlg32 advapi32 shell32 uuid ole32 oleaut32 comctl32 ws2_32
