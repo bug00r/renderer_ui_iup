@@ -171,8 +171,81 @@ static void render_scene_again_and_refresh_canvas()
 
 */
 
-static void __color_scene(scene_t* scene) {
+static scene_t* __renderer_textured_cube(renderer_t *_renderer)
+{
+	renderer_t * renderer = _renderer;
 
+	unsigned int w_ = 512;
+	unsigned int h_ = 512;
+	
+	texture_t * texture_fractals = texture_new(w_,h_);
+	
+	mandelbrot_t *mb = mandelbrot_new(w_, h_);
+	mb->minreal = -2.f;//-1.3f;
+	mb->maxreal = 0.5f;//-1.f;
+	mb->minimag = -1.f;//-.3f;
+	mb->maximag = 1.f;//0.f;
+	mb->cntiterations = 20;
+	create_mandelbrot(mb);
+	
+	mandelbrot_to_texture(mb, texture_fractals, mandelbrot_color_line_int_rgb);
+
+	renderer->texture = texture_fractals;
+    
+	mandelbrot_free(mb);
+
+	return scene_create_texture_test();
+}
+
+typedef struct {
+    vec2_t *charPos;
+	cRGB_t *color;
+	texture_t *texture;
+} __r_render_txt_ctx_t;
+
+static void __rf_text_render_func(float const * const x, float const * const y, void *data)
+{
+    __r_render_txt_ctx_t *ctx = data;
+    vec2_t *charPos = ctx->charPos;
+	cRGB_t *color = ctx->color;
+	texture_t *texture = ctx->texture;
+    long used_x = charPos->x + *x;
+    long used_y = texture->height - charPos->y - *y;
+
+	crgb_array2D_set(texture->buffer, used_x, used_y, color);
+}
+
+static scene_t* __renderer_font_quad(renderer_t *_renderer)
+{
+
+	rf_provider_t* provider = get_default_provider();
+
+    rf_ctx_t rf_ctx;
+    rfont_init(&rf_ctx, provider);
+
+	float glyphSize = 240.f;
+	char* text = "&";
+
+	rf_glyph_meta_t meta;
+	rfont_get_meta( &rf_ctx, &meta, text[0], glyphSize);
+	
+	cRGB_t color = { 1.f, 0.f, 0.f };
+	vec2_t charPos = {0.f, meta.yOffsetChar};
+	unsigned int width = meta.alignedCharBox.xMax - meta.alignedCharBox.xMin + floorf(fabsf(meta.xOffsetChar));
+	unsigned int height = 5 + meta.alignedCharBox.yMax - meta.alignedCharBox.yMin + ceilf(fabsf(meta.yOffsetChar)); 
+
+    printf("x: %i y: %i\n", width, height);
+
+	texture_t *texture = texture_new(width, height);
+	__r_render_txt_ctx_t renderCtx = {&charPos, &color, texture}; 
+
+	rfont_raster_text(&rf_ctx, (unsigned char const * const)text, glyphSize, __rf_text_render_func, &renderCtx);
+	save_texture_normalized_ppm(texture, "test_glyph_tex.ppm");
+
+	renderer_t *renderer = _renderer;
+	renderer->texture = texture;
+
+	return scene_create_texture_quad(width, height);
 }
 
 static render_context_t* create_test_renderer()
@@ -204,7 +277,11 @@ static render_context_t* create_test_renderer()
 	*/
 	//scene = scene_create_triangle();
 	//scene = scene_create_test_all();
-	scene = scene_create_polys();
+	
+	//scene = scene_create_polys(); //created from triangualtion
+	//scene = __renderer_textured_cube(render_ctx->renderer);
+	scene = __renderer_font_quad(render_ctx->renderer);
+	
 	//scene = scene_create_test_cube();
 	//scene = scene_create_tree();
 	//scene = scene_create_test();

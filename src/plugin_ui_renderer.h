@@ -13,6 +13,9 @@
 #include "renderer.h"
 #include "texture.h"
 
+#include "font_provider_default.h"
+#include "r_font.h"
+
 #include "plugin.h"
 
 typedef struct _render_ctx_ {
