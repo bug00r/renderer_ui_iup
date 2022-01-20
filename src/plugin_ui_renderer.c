@@ -160,17 +160,6 @@ static void render_scene_again_and_refresh_canvas()
 	__refresh_canvas();
 }
 
-
-/*
-	Here we need different kind of renderer:
-		- Orthogonal
-		- perspective
-		- opengl
-	
-	this is for check all rendering options with z buffering inside. An easier way to find error.
-
-*/
-
 static scene_t* __renderer_textured_cube(renderer_t *_renderer)
 {
 	renderer_t * renderer = _renderer;
@@ -224,23 +213,25 @@ static scene_t* __renderer_font_quad(renderer_t *_renderer)
     rfont_init(&rf_ctx, provider);
 
 	float glyphSize = 240.f;
-	char* text = "&";
+	char* text = "R";
 
 	rf_glyph_meta_t meta;
 	rfont_get_meta( &rf_ctx, &meta, text[0], glyphSize);
 	
 	cRGB_t color = { 1.f, 0.f, 0.f };
-	vec2_t charPos = {0.f, meta.yOffsetChar};
+	vec2_t charPos = {0.f, -meta.yOffsetChar};
 	unsigned int width = meta.alignedCharBox.xMax - meta.alignedCharBox.xMin + floorf(fabsf(meta.xOffsetChar));
-	unsigned int height = 5 + meta.alignedCharBox.yMax - meta.alignedCharBox.yMin + ceilf(fabsf(meta.yOffsetChar)); 
+	unsigned int height = meta.alignedCharBox.yMax - meta.alignedCharBox.yMin + ceilf(fabsf(meta.yOffsetChar)); 
 
-    printf("x: %i y: %i\n", width, height);
+    //printf("x: %i y: %i\n", width, height);
 
 	texture_t *texture = texture_new(width, height);
+	cRGB_t clearcolor = { 1.f, 0.f, 1.f };
+	texture_clear(texture, &clearcolor);
 	__r_render_txt_ctx_t renderCtx = {&charPos, &color, texture}; 
 
 	rfont_raster_text(&rf_ctx, (unsigned char const * const)text, glyphSize, __rf_text_render_func, &renderCtx);
-	save_texture_normalized_ppm(texture, "test_glyph_tex.ppm");
+	//save_texture_normalized_ppm(texture, "test_glyph_tex.ppm");
 
 	renderer_t *renderer = _renderer;
 	renderer->texture = texture;
