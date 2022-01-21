@@ -199,10 +199,50 @@ static void __rf_text_render_func(float const * const x, float const * const y, 
 	cRGB_t *color = ctx->color;
 	texture_t *texture = ctx->texture;
     long used_x = charPos->x + *x;
-    long used_y = texture->height - charPos->y - *y;
+    long used_y = ceilf((float)texture->height - charPos->y - *y);
 
-	crgb_array2D_set(texture->buffer, used_x, used_y, color);
+	//printf("y: %li = %i - %f - %f => %f\n", used_y, texture->height ,charPos->y ,*y, (float)texture->height - charPos->y - *y);
+
+	array_error_t err = crgb_array2D_set(texture->buffer, used_x, used_y, color);
 }
+
+
+static scene_t* __renderer_text_quad(renderer_t *_renderer)
+{
+
+	rf_provider_t* provider = get_default_provider();
+
+    rf_ctx_t rf_ctx;
+    rfont_init(&rf_ctx, provider);
+
+	float glyphSize = 120.f;
+	char* text = "Hallo Welt !! :D";
+
+	rf_glyph_meta_t meta;
+	rfont_get_meta_str( &rf_ctx, &meta, (unsigned char const * const)text, glyphSize);
+	
+	cRGB_t color = { 1.f, 1.f, 1.f };
+	vec2_t charPos = {0.f, -meta.yOffsetChar};
+
+	unsigned int width = meta.alignedCharBox.xMax;
+	unsigned int height = meta.alignedCharBox.yMax;
+
+    printf("x: %i y: %i\n", width, height);
+
+	texture_t *texture = texture_new(width, height);
+	cRGB_t clearcolor = { 1.f, 0.f, 1.f };
+	texture_clear(texture, &clearcolor);
+	__r_render_txt_ctx_t renderCtx = {&charPos, &color, texture}; 
+
+	rfont_raster_text(&rf_ctx, (unsigned char const * const)text, glyphSize, __rf_text_render_func, &renderCtx);
+	//save_texture_normalized_ppm(texture, "test_glyph_tex.ppm");
+
+	renderer_t *renderer = _renderer;
+	renderer->texture = texture;
+
+	return scene_create_text_quad(width, height, .25f);
+}
+
 
 static scene_t* __renderer_font_quad(renderer_t *_renderer)
 {
@@ -236,7 +276,7 @@ static scene_t* __renderer_font_quad(renderer_t *_renderer)
 	renderer_t *renderer = _renderer;
 	renderer->texture = texture;
 
-	return scene_create_texture_quad(width, height);
+	return scene_create_texture_quad(width, height, 1.f, 1.f);
 }
 
 static render_context_t* create_test_renderer()
@@ -271,8 +311,8 @@ static render_context_t* create_test_renderer()
 	
 	//scene = scene_create_polys(); //created from triangualtion
 	//scene = __renderer_textured_cube(render_ctx->renderer);
-	scene = __renderer_font_quad(render_ctx->renderer);
-	
+	//scene = __renderer_font_quad(render_ctx->renderer);
+	scene = __renderer_text_quad(render_ctx->renderer);
 	//scene = scene_create_test_cube();
 	//scene = scene_create_tree();
 	//scene = scene_create_test();

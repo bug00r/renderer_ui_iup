@@ -38,7 +38,7 @@ ifeq ($(OUTPUT),1)
 	export outimg= -Doutput=1
 endif
 
-CFLAGS=-std=c11 -Wall -Wextra -O1 $(debug)
+CFLAGS=-std=c11 -O1 $(debug)
 
 LIB?=-L/c/dev/lib
 INCLUDE?=-I/c/dev/include -I.
