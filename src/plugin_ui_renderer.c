@@ -14,6 +14,12 @@ typedef struct {
 	Ihandle* mat4_view[16];
 	Ihandle* mat4_proj[16];
 	Ihandle* mat4_trans[16];
+	Ihandle* frustum_near[15];
+	Ihandle* frustum_far[15];
+	Ihandle* frustum_left[15];
+	Ihandle* frustum_right[15];
+	Ihandle* frustum_top[15];
+	Ihandle* frustum_bottom[15];
 } render_context_t;
 
 static void convertFramebuffer_iupCanvas(renderer_t * renderer, cdCanvas * canvas) 
@@ -78,6 +84,34 @@ static void update_debug_vec3(Ihandle **targets, vec3_t *data) {
 	IupSetFloat(targets[2], "TITLE", data->z);
 }
 
+static void update_debug_frustum_plane(Ihandle **targets, plane_t *plane)
+{
+	vec3_t *vec = &plane->lt;
+	IupSetFloat(targets[0], "TITLE", vec->x);
+	IupSetFloat(targets[1], "TITLE", vec->y);
+	IupSetFloat(targets[2], "TITLE", vec->z);
+
+	vec = &plane->rt;
+	IupSetFloat(targets[3], "TITLE", vec->x);
+	IupSetFloat(targets[4], "TITLE", vec->y);
+	IupSetFloat(targets[5], "TITLE", vec->z);
+
+	vec = &plane->lb;
+	IupSetFloat(targets[6], "TITLE", vec->x);
+	IupSetFloat(targets[7], "TITLE", vec->y);
+	IupSetFloat(targets[8], "TITLE", vec->z);
+
+	vec = &plane->rb;
+	IupSetFloat(targets[9], "TITLE", vec->x);
+	IupSetFloat(targets[10], "TITLE", vec->y);
+	IupSetFloat(targets[11], "TITLE", vec->z);
+
+	vec = &plane->normal;
+	IupSetFloat(targets[12], "TITLE", vec->x);
+	IupSetFloat(targets[13], "TITLE", vec->y);
+	IupSetFloat(targets[14], "TITLE", vec->z);
+}
+
 static void update_debug_view(renderer_t* renderer) {
 	camera_t *cam = &renderer->camera;
 	render_context_t * rctx = (render_context_t *)IupGetGlobal("RCTX");
@@ -91,6 +125,13 @@ static void update_debug_view(renderer_t* renderer) {
 	update_debug_mat4(&rctx->mat4_view[0], &cam->view);
 	update_debug_mat4(&rctx->mat4_proj[0], &cam->projection);
 	update_debug_mat4(&rctx->mat4_trans[0], &cam->transformation);
+
+	update_debug_frustum_plane(&rctx->frustum_near[0], &cam->frustum.near);
+	update_debug_frustum_plane(&rctx->frustum_far[0], &cam->frustum.far);
+	update_debug_frustum_plane(&rctx->frustum_left[0], &cam->frustum.left);
+	update_debug_frustum_plane(&rctx->frustum_right[0], &cam->frustum.right);
+	update_debug_frustum_plane(&rctx->frustum_top[0], &cam->frustum.top);
+	update_debug_frustum_plane(&rctx->frustum_bottom[0], &cam->frustum.bottom);
 }
 
 void render_scence_again()
@@ -179,13 +220,13 @@ static render_context_t* create_test_renderer()
 	render_ctx->to = (vec3_t){0.f, 0.0f, .0f};
 	render_ctx->renderer = renderer_new(512, 512, &render_ctx->bgcolor, 4);
 	render_ctx->renderer->projection = RP_PERSPECTIVE;
-	float view = 1.5f;
+	float view = .5f;
 	render_ctx->l = -view;
 	render_ctx->r = view;
 	render_ctx->t = view;
 	render_ctx->b = -view;
-	render_ctx->f = 3.f;
-	render_ctx->n = .05f;
+	render_ctx->f = 4.f;
+	render_ctx->n = 1.f;
 	scene_t * scene;
 	texture_cache_t *texCache = render_ctx->renderer->texture_cache;
 	/*float waterfall_data[240] = { 
@@ -291,17 +332,6 @@ static void unmap_frame(Ihandle * ih)
 	cdKillCanvas(canvas);
 }
 
-static Ihandle * create__render_frame()
-{
-	Ihandle * canvas = create__render_canvas();
-	Ihandle * liveview = create_live_view_toggle();
-	Ihandle * container = IupVbox(canvas, liveview, NULL);
-	Ihandle *frame = IupFrame(container);
-	IupSetAttribute(frame, "TITLE", "Render Window");
-	IupSetCallback(frame, "UNMAP_CB", (Icallback)unmap_frame);
-	return frame;
-}
-
 static int render_view_zoom(float zoom)
 {
 	render_context_t * rctx = (render_context_t *)IupGetGlobal("RCTX");
@@ -367,9 +397,11 @@ static Ihandle * create_render_vmode_frame() {
 	Ihandle *points	= IupToggle ("Points", "");
 	IupSetCallback(points, "ACTION",(Icallback)choose_vmode_points);
 	
-	Ihandle * vmodes = IupRadio( IupVbox( solid, wireframe, points, NULL ) );
-	Ihandle * container = IupHbox(vmodes, NULL);
-	Ihandle *frame = IupFrame(container);
+	Ihandle *container = IupVbox( solid, wireframe, points, NULL );
+	
+	Ihandle * vmodes = IupRadio( container );
+
+	Ihandle *frame = IupFrame(vmodes);
 	IupSetAttribute(frame, "TITLE", "View Modes");
 	return frame;
 }
@@ -387,6 +419,9 @@ static Ihandle * create_render_zoom_options_frame()
 	IupSetCallback(zoomfactor, "VALUECHANGED_CB",(Icallback)render_view_zoom_factor_changed);
 	
  	Ihandle * container = IupHbox(IupLabel("Zoom:"), zoomfactor, NULL);
+	IupSetAttribute(container, "EXPAND", "HORIZONTAL");
+	IupSetAttribute(container, "EXPANDCHILDREN", "YES");
+	
 	Ihandle *frame = IupFrame(container);
 	IupSetAttribute(frame, "TITLE", "Zoom Options");
 	return frame;
@@ -482,7 +517,7 @@ static void __gbox_set_default_attrs(Ihandle *gbox) {
 	IupSetAttribute(gbox, "GAPCOL", "5");
 	IupSetAttribute(gbox, "NORMALIZESIZE", "BOTH");
 	IupSetAttribute(gbox, "NORMALIZESIZE", "HORIZONTAL");
-	IupSetAttribute(gbox, "EXPANDCHILDREN", "HORIZONTAL");
+	IupSetAttribute(gbox, "EXPANDCHILDREN", "YES");
 }
 
 Ihandle* create_render_debug_cam_vecs() {
@@ -531,8 +566,10 @@ Ihandle* create_render_debug_cam_vecs() {
 	Ihandle *frame = IupGridBoxv( &handles[0] );
 	
 	IupSetAttribute(frame, "NUMDIV", "4");
+	IupSetAttribute(frame, "EXPANDCHILDREN", "YES");
 	__gbox_set_default_attrs(frame);
-	return IupSetAttributes(IupFrame(frame), "TITLE=Camera-Vectors");
+
+	return IupSetAttributes(IupFrame(frame), "TITLE=Camera-Vectors, EXPANDCHILDREN=YES");
 }
 
 Ihandle *create_render_debug_cam_mat4(const char* title, Ihandle **save_handles) {
@@ -578,22 +615,111 @@ Ihandle *create_render_debug_cam_mat4(const char* title, Ihandle **save_handles)
 	Ihandle *frame = IupGridBoxv( &handles[0] );
 
 	IupSetAttribute(frame, "NUMDIV", "5");
+	IupSetAttribute(frame, "EXPANDCHILDREN", "YES");
 	__gbox_set_default_attrs(frame);
 	Ihandle *mat_frame = IupFrame(frame);
 	IupSetAttribute(mat_frame, "TITLE", title);
 	return mat_frame;
 }
 
+Ihandle* create_render_debug_frustum_plane(const char *label, Ihandle** save_handles)
+{
+
+	Ihandle *handles[] = {
+		IupSetAttributes(IupLabel(""), ""), 
+		IupSetAttributes(IupLabel("x"), "FONTSTYLE=Bold"), 
+		IupSetAttributes(IupLabel("y"), "FONTSTYLE=Bold"), 
+		IupSetAttributes(IupLabel("z"), "FONTSTYLE=Bold"),
+		
+		IupSetAttributes(IupLabel("LT"), "FONTSTYLE=Bold"), 
+		/*[5]*/IupSetAttributes(IupLabel("-"), ""), 
+		/*[6]*/IupSetAttributes(IupLabel("-"), ""), 
+		/*[7]*/IupSetAttributes(IupLabel("-"), ""), 
+		
+		IupSetAttributes(IupLabel("RT"), "FONTSTYLE=Bold"),
+		/*[9]*/IupSetAttributes(IupLabel("-"), ""), 
+		/*[10]*/IupSetAttributes(IupLabel("-"), ""), 
+		/*[11]*/IupSetAttributes(IupLabel("-"), ""), 
+		
+		IupSetAttributes(IupLabel("LB"), "FONTSTYLE=Bold"), 
+		/*[13]*/IupSetAttributes(IupLabel("-"), ""), 
+		/*[14]*/IupSetAttributes(IupLabel("-"), ""), 
+		/*[15]*/IupSetAttributes(IupLabel("-"), ""), 
+
+		IupSetAttributes(IupLabel("RB"), "FONTSTYLE=Bold"), 
+		/*[17]*/IupSetAttributes(IupLabel("-"), ""), 
+		/*[18]*/IupSetAttributes(IupLabel("-"), ""), 
+		/*[19]*/IupSetAttributes(IupLabel("-"), ""), 
+
+
+		IupSetAttributes(IupLabel("NORMAL"), "FONTSTYLE=Bold"),
+		/*[21]*/IupSetAttributes(IupLabel("-"), ""), 
+		/*[22]*/IupSetAttributes(IupLabel("-"), ""), 
+		/*[23]*/IupSetAttributes(IupLabel("-"), ""),
+		NULL
+	};
+
+	Ihandle ** hnd = save_handles;
+	hnd[0] = handles[5]; hnd[1] = handles[6]; hnd[2] = handles[7];
+	hnd[3] = handles[9]; hnd[4] = handles[10]; hnd[5] = handles[11];
+	hnd[6] = handles[13]; hnd[7] = handles[14]; hnd[8] = handles[15];
+	hnd[9] = handles[17]; hnd[10] = handles[18]; hnd[11] = handles[19];
+	hnd[12] = handles[21]; hnd[13] = handles[22]; hnd[14] = handles[23];
+
+
+	Ihandle *container = IupGridBoxv( &handles[0] );
+
+	IupSetAttribute(container, "NUMDIV", "4");
+	__gbox_set_default_attrs(container);
+	Ihandle *frame = IupFrame(container);
+	IupSetAttribute(frame, "TITLE", label);
+
+	return frame;
+}
+
+Ihandle* create_render_debug_frustum()
+{
+	render_context_t * rctx = (render_context_t *)IupGetGlobal("RCTX");
+
+	Ihandle* frustum_container = IupVbox(
+		create_render_debug_frustum_plane("Near", &rctx->frustum_near[0]),
+		create_render_debug_frustum_plane("Far", &rctx->frustum_far[0]),
+		create_render_debug_frustum_plane("Left", &rctx->frustum_left[0]),
+		create_render_debug_frustum_plane("Right", &rctx->frustum_right[0]),
+		create_render_debug_frustum_plane("Top", &rctx->frustum_top[0]),
+		create_render_debug_frustum_plane("Bottom", &rctx->frustum_bottom[0]),
+		NULL
+	);
+
+	Ihandle *frame = IupFrame(frustum_container);
+	IupSetAttribute(frame, "TITLE", "View Frustum");
+
+	return frame;
+}
+
 /*
+typedef struct {
+	renderer_t *renderer;
+	scene_t *scene;
+	vec3_t from, to;
+	float l,r,t,b,f,n;
+	cRGB_t  bgcolor;
+	Ihandle* cam_from[3];
+	Ihandle* cam_to[3];
+	Ihandle* cam_left[3];
+	Ihandle* cam_up[3];
+	Ihandle* cam_forward[3];
 	Ihandle* mat4_view[16];
 	Ihandle* mat4_proj[16];
 	Ihandle* mat4_trans[16];
+	Ihandle* frustum[72];
+} render_context_t;
 */
 Ihandle* create_render_debug_view_frame() {
 
 	render_context_t * rctx = (render_context_t *)IupGetGlobal("RCTX");
 
-	Ihandle *frame = IupGridBox(
+	Ihandle *container = IupGridBox(
 		create_render_debug_cam_vecs(),
 		create_render_debug_cam_mat4("View Matrix", &rctx->mat4_view[0]),
 		create_render_debug_cam_mat4("Projection Matrix", &rctx->mat4_proj[0]),
@@ -601,12 +727,48 @@ Ihandle* create_render_debug_view_frame() {
 		NULL
 	);
 
-	IupSetAttribute(frame, "NUMDIV", "2");
-	__gbox_set_default_attrs(frame);
+	IupSetAttribute(container, "NUMDIV", "2");
+	__gbox_set_default_attrs(container);
 	//cam vector matrix from, to, forward left up  : label x y z
 
+	Ihandle* debug_frustum = create_render_debug_frustum();
+
+	Ihandle* frame = IupHbox(debug_frustum, container, NULL);
 	//view matrix
 	//projection matrix
+	return frame;
+}
+
+Ihandle * create_render_options()
+{
+	render_context_t * rctx = (render_context_t *)IupGetGlobal("RCTX");
+
+	Ihandle *frame = IupVbox(
+		create_render_zoom_options_frame(),
+		create_render_vmode_frame(),
+		create_render_rotation_options_frame(),
+		NULL
+	);
+
+	//IupSetAttribute(frame, "NUMDIV", "3");
+	//__gbox_set_default_attrs(frame);
+
+	return frame;
+
+}
+
+static Ihandle * create__render_frame()
+{
+	Ihandle * canvas = create__render_canvas();
+	Ihandle * liveview = create_live_view_toggle();
+	Ihandle * render_options = create_render_options();
+	Ihandle * container = IupVbox(canvas, liveview, NULL);
+
+	Ihandle * render_frame = IupFrame(container);
+	IupSetAttribute(render_frame, "TITLE", "Render Window");
+	IupSetCallback(render_frame, "UNMAP_CB", (Icallback)unmap_frame);
+
+	Ihandle * frame = IupVbox(render_frame, render_options, NULL);
 	return frame;
 }
 
@@ -615,11 +777,9 @@ Ihandle* create_and_show_dialog()
 	render_context_t *render_ctx = create_test_renderer();
 	
 	Ihandle *render_frame = create__render_frame();
-	Ihandle *render_zoom_options_frame = create_render_zoom_options_frame();
-	Ihandle *render_vmode_frame = create_render_vmode_frame();
-	Ihandle *render_rotation_options_frame = create_render_rotation_options_frame();
 	Ihandle *render_debug_view_frame = create_render_debug_view_frame();
-	Ihandle *move_opt_box = IupVbox(render_zoom_options_frame, render_vmode_frame,render_rotation_options_frame, render_debug_view_frame, NULL);
+	Ihandle *move_opt_box = IupGridBox(render_debug_view_frame, NULL);
+	//__gbox_set_default_attrs(move_opt_box);
 	Ihandle *render_0 = IupHbox( render_frame, move_opt_box, NULL);
 	
 
