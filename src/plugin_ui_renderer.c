@@ -216,17 +216,17 @@ static render_context_t* create_test_renderer()
 	render_context_t * render_ctx = malloc(sizeof(render_context_t));
 	render_ctx->bgcolor = (cRGB_t){0.7f, 0.7f, 0.7f};
 	//render_ctx->from = (vec3_t){-3.5f, 3.f, -4.5f };
-	render_ctx->from = (vec3_t){0.f, 0.f, 2.f }; //perspective
-	render_ctx->to = (vec3_t){0.f, 0.0f, .0f};
-	render_ctx->renderer = renderer_new(512, 512, &render_ctx->bgcolor, 4);
+	render_ctx->from = (vec3_t){0.f, 0.f, 2.0f }; //perspective
+	render_ctx->to = (vec3_t){0.f, 0.0f, 0.0f};
+	render_ctx->renderer = renderer_new(512, 512, &render_ctx->bgcolor, 2);
 	render_ctx->renderer->projection = RP_PERSPECTIVE;
 	float view = .5f;
 	render_ctx->l = -view;
 	render_ctx->r = view;
 	render_ctx->t = view;
 	render_ctx->b = -view;
-	render_ctx->f = 4.f;
-	render_ctx->n = 1.f;
+	render_ctx->f = 2.5f;
+	render_ctx->n = 0.2f;
 	scene_t * scene;
 	texture_cache_t *texCache = render_ctx->renderer->texture_cache;
 	/*float waterfall_data[240] = { 
@@ -239,7 +239,7 @@ static render_context_t* create_test_renderer()
 	scene = scene_create_waterfall_diagram(texCache, &waterfall_data[0], 30, 8);
 	*/
 	//scene = scene_create_triangle();
-	scene = scene_create_test_all();
+	scene = scene_create_test_all(1.f);
 	
 	//cRGB_t txtCol = {1.f, 0.f, 0.f};
 
