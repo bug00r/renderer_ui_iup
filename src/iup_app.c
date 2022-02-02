@@ -28,6 +28,8 @@ void iup_init_app(app_t * app, app_param_t * param) {
 	#endif
 	IupOpen(&app->argc, &app->argv);
 	
+	IupSetGlobal("UTF8MODE", "YES");
+
 	plugin_t * plugin = new_plugin(); 
 	main_plugin(plugin);
 	plugin->init(plugin->data);

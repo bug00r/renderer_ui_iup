@@ -10,6 +10,7 @@
 #include <im_util.h>
 #include <wd.h>
 
+#include "defs.h"
 #include "dl_list.h"
 #include "xml_utils.h"
 #include "resource.h"

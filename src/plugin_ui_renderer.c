@@ -354,31 +354,31 @@ static int render_view_zoom_factor_changed(Ihandle * ih)
 	return IUP_DEFAULT;
 }
 
-int choose_vmode_solid(Ihandle* ih, int state) {
+typedef void (* VMODE_CHANGE_FN)(renderer_t* renderer);
+
+static int __renderer_change_vmode(VMODE_CHANGE_FN modechangefn)
+{
 	render_context_t * rctx = (render_context_t *)IupGetGlobal("RCTX");
 	renderer_t * renderer = rctx->renderer;
-	renderer_set_vmode_solid(renderer);
+	modechangefn(renderer);
 	render_scene_again_and_refresh_canvas();
 
 	return IUP_DEFAULT;
 }
 
-int choose_vmode_wireframe(Ihandle* ih, int state) {
-	render_context_t * rctx = (render_context_t *)IupGetGlobal("RCTX");
-	renderer_t * renderer = rctx->renderer;
-	renderer_set_vmode_line(renderer);
-	render_scene_again_and_refresh_canvas();
-
-	return IUP_DEFAULT;
+int choose_vmode_solid(Ihandle* ih, int state) 
+{
+	return __renderer_change_vmode(renderer_set_vmode_solid);
 }
 
-int choose_vmode_points(Ihandle* ih, int state) {
-	render_context_t * rctx = (render_context_t *)IupGetGlobal("RCTX");
-	renderer_t * renderer = rctx->renderer;
-	renderer_set_vmode_point(renderer);
-	render_scene_again_and_refresh_canvas();
-	
-	return IUP_DEFAULT;
+int choose_vmode_wireframe(Ihandle* ih, int state) 
+{
+	return __renderer_change_vmode(renderer_set_vmode_line);
+}
+
+int choose_vmode_points(Ihandle* ih, int state) 
+{
+	return __renderer_change_vmode(renderer_set_vmode_point);
 }
 
 static Ihandle * create_render_vmode_frame() {
@@ -484,6 +484,11 @@ static void __gbox_set_default_attrs(Ihandle *gbox) {
 	IupSetAttribute(gbox, "EXPANDCHILDREN", "YES");
 }
 
+static Ihandle* __renderer_empty_label()
+{
+	return IupSetAttributes(IupLabel("-"), "");
+}
+
 Ihandle* create_render_debug_cam_vecs() {
 	
 	Ihandle *handles[] = {
@@ -493,24 +498,24 @@ Ihandle* create_render_debug_cam_vecs() {
 		IupSetAttributes(IupLabel("z"), "FONTSTYLE=Bold"),
 		
 		IupSetAttributes(IupLabel("from"), "FONTSTYLE=Bold"), 
-		/*[5]*/IupSetAttributes(IupLabel("-"), ""), 
-		/*[6]*/IupSetAttributes(IupLabel("-"), ""), 
-		/*[7]*/IupSetAttributes(IupLabel("-"), ""), 
+		/*[5]*/__renderer_empty_label(), 
+		/*[6]*/__renderer_empty_label(), 
+		/*[7]*/__renderer_empty_label(), 
 		
 		IupSetAttributes(IupLabel("to"), "FONTSTYLE=Bold"),
-		/*[9]*/IupSetAttributes(IupLabel("-"), ""), 
-		/*[10]*/IupSetAttributes(IupLabel("-"), ""), 
-		/*[11]*/IupSetAttributes(IupLabel("-"), ""), 
+		/*[9]*/__renderer_empty_label(), 
+		/*[10]*/__renderer_empty_label(), 
+		/*[11]*/__renderer_empty_label(), 
 		
 		IupSetAttributes(IupLabel("forward"), "FONTSTYLE=Bold"), 
-		/*[13]*/IupSetAttributes(IupLabel("-"), ""), 
-		/*[14]*/IupSetAttributes(IupLabel("-"), ""), 
-		/*[15]*/IupSetAttributes(IupLabel("-"), ""), 
+		/*[13]*/__renderer_empty_label(), 
+		/*[14]*/__renderer_empty_label(), 
+		/*[15]*/__renderer_empty_label(), 
 
 		IupSetAttributes(IupLabel("left"), "FONTSTYLE=Bold"), 
-		/*[17]*/IupSetAttributes(IupLabel("-"), ""), 
-		/*[18]*/IupSetAttributes(IupLabel("-"), ""), 
-		/*[19]*/IupSetAttributes(IupLabel("-"), ""), 
+		/*[17]*/__renderer_empty_label(), 
+		/*[18]*/__renderer_empty_label(), 
+		/*[19]*/__renderer_empty_label(), 
 
 
 		IupSetAttributes(IupLabel("up"), "FONTSTYLE=Bold"),
@@ -545,28 +550,28 @@ Ihandle *create_render_debug_cam_mat4(const char* title, Ihandle **save_handles)
 		IupSetAttributes(IupLabel("4"), "FONTSTYLE=Bold"),
 		
 		IupSetAttributes(IupLabel("1"), "FONTSTYLE=Bold"), 
-		/*[6]*/IupSetAttributes(IupLabel("-"), ""), 
-		/*[7]*/IupSetAttributes(IupLabel("-"), ""), 
-		/*[8]*/IupSetAttributes(IupLabel("-"), ""), 
-		/*[9]*/IupSetAttributes(IupLabel("-"), ""), 
+		/*[6]*/__renderer_empty_label(), 
+		/*[7]*/__renderer_empty_label(), 
+		/*[8]*/__renderer_empty_label(), 
+		/*[9]*/__renderer_empty_label(), 
 		
 		IupSetAttributes(IupLabel("2"), "FONTSTYLE=Bold"),
-		/*[11]*/IupSetAttributes(IupLabel("-"), ""), 
-		/*[12]*/IupSetAttributes(IupLabel("-"), ""), 
-		/*[13]*/IupSetAttributes(IupLabel("-"), ""), 
-		/*[14]*/IupSetAttributes(IupLabel("-"), ""), 
+		/*[11]*/__renderer_empty_label(), 
+		/*[12]*/__renderer_empty_label(), 
+		/*[13]*/__renderer_empty_label(), 
+		/*[14]*/__renderer_empty_label(), 
 		
 		IupSetAttributes(IupLabel("3"), "FONTSTYLE=Bold"), 
-		/*[16]*/IupSetAttributes(IupLabel("-"), ""), 
-		/*[17]*/IupSetAttributes(IupLabel("-"), ""), 
-		/*[18]*/IupSetAttributes(IupLabel("-"), ""), 
-		/*[19]*/IupSetAttributes(IupLabel("-"), ""), 
+		/*[16]*/__renderer_empty_label(), 
+		/*[17]*/__renderer_empty_label(), 
+		/*[18]*/__renderer_empty_label(), 
+		/*[19]*/__renderer_empty_label(), 
 
 		IupSetAttributes(IupLabel("4"), "FONTSTYLE=Bold"), 
-		/*[21]*/IupSetAttributes(IupLabel("-"), ""), 
-		/*[22]*/IupSetAttributes(IupLabel("-"), ""), 
-		/*[23]*/IupSetAttributes(IupLabel("-"), ""), 
-		/*[24]*/IupSetAttributes(IupLabel("-"), ""), 
+		/*[21]*/__renderer_empty_label(), 
+		/*[22]*/__renderer_empty_label(), 
+		/*[23]*/__renderer_empty_label(), 
+		/*[24]*/__renderer_empty_label(), 
 		NULL
 	};
 
@@ -596,30 +601,30 @@ Ihandle* create_render_debug_frustum_plane(const char *label, Ihandle** save_han
 		IupSetAttributes(IupLabel("z"), "FONTSTYLE=Bold"),
 		
 		IupSetAttributes(IupLabel("LT"), "FONTSTYLE=Bold"), 
-		/*[5]*/IupSetAttributes(IupLabel("-"), ""), 
-		/*[6]*/IupSetAttributes(IupLabel("-"), ""), 
-		/*[7]*/IupSetAttributes(IupLabel("-"), ""), 
+		/*[5]*/__renderer_empty_label(), 
+		/*[6]*/__renderer_empty_label(), 
+		/*[7]*/__renderer_empty_label(), 
 		
 		IupSetAttributes(IupLabel("RT"), "FONTSTYLE=Bold"),
-		/*[9]*/IupSetAttributes(IupLabel("-"), ""), 
-		/*[10]*/IupSetAttributes(IupLabel("-"), ""), 
-		/*[11]*/IupSetAttributes(IupLabel("-"), ""), 
+		/*[9]*/__renderer_empty_label(), 
+		/*[10]*/__renderer_empty_label(), 
+		/*[11]*/__renderer_empty_label(), 
 		
 		IupSetAttributes(IupLabel("LB"), "FONTSTYLE=Bold"), 
-		/*[13]*/IupSetAttributes(IupLabel("-"), ""), 
-		/*[14]*/IupSetAttributes(IupLabel("-"), ""), 
-		/*[15]*/IupSetAttributes(IupLabel("-"), ""), 
+		/*[13]*/__renderer_empty_label(), 
+		/*[14]*/__renderer_empty_label(), 
+		/*[15]*/__renderer_empty_label(), 
 
 		IupSetAttributes(IupLabel("RB"), "FONTSTYLE=Bold"), 
-		/*[17]*/IupSetAttributes(IupLabel("-"), ""), 
-		/*[18]*/IupSetAttributes(IupLabel("-"), ""), 
-		/*[19]*/IupSetAttributes(IupLabel("-"), ""), 
+		/*[17]*/__renderer_empty_label(), 
+		/*[18]*/__renderer_empty_label(), 
+		/*[19]*/__renderer_empty_label(), 
 
 
 		IupSetAttributes(IupLabel("NORMAL"), "FONTSTYLE=Bold"),
-		/*[21]*/IupSetAttributes(IupLabel("-"), ""), 
-		/*[22]*/IupSetAttributes(IupLabel("-"), ""), 
-		/*[23]*/IupSetAttributes(IupLabel("-"), ""),
+		/*[21]*/__renderer_empty_label(), 
+		/*[22]*/__renderer_empty_label(), 
+		/*[23]*/__renderer_empty_label(),
 		NULL
 	};
 
@@ -661,24 +666,6 @@ Ihandle* create_render_debug_frustum()
 	return frame;
 }
 
-/*
-typedef struct {
-	renderer_t *renderer;
-	scene_t *scene;
-	vec3_t from, to;
-	float l,r,t,b,f,n;
-	cRGB_t  bgcolor;
-	Ihandle* cam_from[3];
-	Ihandle* cam_to[3];
-	Ihandle* cam_left[3];
-	Ihandle* cam_up[3];
-	Ihandle* cam_forward[3];
-	Ihandle* mat4_view[16];
-	Ihandle* mat4_proj[16];
-	Ihandle* mat4_trans[16];
-	Ihandle* frustum[72];
-} render_context_t;
-*/
 Ihandle* create_render_debug_view_frame() {
 
 	render_context_t * rctx = (render_context_t *)IupGetGlobal("RCTX");
