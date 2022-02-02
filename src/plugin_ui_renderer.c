@@ -427,7 +427,9 @@ static Ihandle * create_render_zoom_options_frame()
 	return frame;
 }
 
-static int render_view_rot(float rot, mat3_t * (* matcreate)( mat3_t * dest, const float rot) )
+typedef mat3_t * (* MATCREATE_FN)( mat3_t * dest, const float rot);
+
+static int render_view_rot(float rot, MATCREATE_FN matcreate  )
 {
 	mat3_t rotmat;
 	render_context_t * rctx = (render_context_t *)IupGetGlobal("RCTX");
@@ -440,71 +442,39 @@ static int render_view_rot(float rot, mat3_t * (* matcreate)( mat3_t * dest, con
 	return IUP_DEFAULT;
 }
 
-static int render_view_rotx_factor_changed(Ihandle * ih)
-{
-	float lr = IupGetFloat(ih, "ROT");
-	float cr = IupGetFloat(ih, "VALUE");
-	IupSetFloat(ih, "ROT", cr);
-	
-	render_view_rot(cr-lr, create_rot_x_mat_dest);
-	return IUP_DEFAULT;
-}
-
-static int render_view_roty_factor_changed(Ihandle * ih)
-{
-	float lr = IupGetFloat(ih, "ROT");
-	float cr = IupGetFloat(ih, "VALUE");
-	IupSetFloat(ih, "ROT", cr);
-	
-	render_view_rot(cr-lr, create_rot_y_mat_dest);
-	return IUP_DEFAULT;
-}
-
-static int render_view_rotz_factor_changed(Ihandle * ih)
+static int render_view_factor_changed(Ihandle * ih)
 {	
 	float lr = IupGetFloat(ih, "ROT");
 	float cr = IupGetFloat(ih, "VALUE");
 	IupSetFloat(ih, "ROT", cr);
 	
-	render_view_rot(cr-lr, create_rot_z_mat_dest);
+	MATCREATE_FN matcreate = (MATCREATE_FN)IupGetAttribute(ih, "MATCREATE");
+
+	render_view_rot(cr-lr, matcreate);
 	return IUP_DEFAULT;
+}
+
+static Ihandle* __renderer_create_rot_val(const char* label, MATCREATE_FN matcreate)
+{
+	Ihandle * new_rot_val = IupVal(IUP_HORIZONTAL);
+	IupSetAttributes(new_rot_val, "MIN=-180, MAX=180, VALUE=0, ROT=0");
+	IupSetAttribute(new_rot_val, "MATCREATE", (void*)matcreate);
+
+	IupSetCallback(new_rot_val, "VALUECHANGED_CB",(Icallback)render_view_factor_changed);
+	
+	Ihandle * rotx_container = IupHbox(IupLabel(label), new_rot_val, NULL);
+
+	return rotx_container;
 }
 
 static Ihandle * create_render_rotation_options_frame()
 {
-	#if 0
-		//rotation over x axis elements
-	#endif
-	Ihandle * rotxfactor = IupVal(IUP_HORIZONTAL);
-	IupSetFloat(rotxfactor, "MAX", 179.9f);
-	IupSetFloat(rotxfactor, "VALUE", 89.9f);
-	IupSetFloat(rotxfactor, "ROT", 89.9f);
-	IupSetCallback(rotxfactor, "VALUECHANGED_CB",(Icallback)render_view_rotx_factor_changed);
-	
-	Ihandle * rotx_container = IupHbox(IupLabel("x-Axis: "), rotxfactor, NULL);
-	
-	#if 0
-		//rotation over y axis elements
-	#endif
-	Ihandle * rotyfactor = IupVal(IUP_HORIZONTAL);
-	IupSetFloat(rotyfactor, "MAX", 179.9f);
-	IupSetFloat(rotyfactor, "VALUE", 89.9f);
-	IupSetFloat(rotyfactor, "ROT", 89.9f);
-	IupSetCallback(rotyfactor, "VALUECHANGED_CB",(Icallback)render_view_roty_factor_changed);
-	
-	Ihandle * roty_container = IupHbox(IupLabel("y-Axis: "), rotyfactor, NULL);
-	
-	#if 0
-		//rotation over z axis elements
-	#endif
-	Ihandle * rotzfactor = IupVal(IUP_HORIZONTAL);
-	IupSetFloat(rotzfactor, "MAX", 179.9f);
-	IupSetFloat(rotzfactor, "VALUE", 89.9f);
-	IupSetFloat(rotzfactor, "ROT", 89.9f);
-	IupSetCallback(rotzfactor, "VALUECHANGED_CB",(Icallback)render_view_rotz_factor_changed);
-	
-	Ihandle * rotz_container = IupHbox(IupLabel("z-Axis: "), rotzfactor, NULL);
-	
+
+	/* rotation slider for different axis */
+	Ihandle* rotx_container = __renderer_create_rot_val("x-Axis: ", create_rot_x_mat_dest);
+	Ihandle* roty_container = __renderer_create_rot_val("y-Axis: ", create_rot_y_mat_dest);
+	Ihandle* rotz_container = __renderer_create_rot_val("z-Axis: ", create_rot_z_mat_dest);
+
 	Ihandle *frame = IupFrame(IupVbox(rotx_container, roty_container, rotz_container, NULL));
 	IupSetAttribute(frame, "TITLE", "Rotation Options");
 	return frame;
