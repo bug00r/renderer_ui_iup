@@ -338,14 +338,8 @@ static int render_view_zoom(float zoom)
 	vec3_t * from = &rctx->from;
 	vec3_t normalized;
 	vec3_normalize_dest( &normalized, from);
-	//vec3_mul(&normalized, zoom);
-	normalized.x *= zoom;
-	normalized.y *= zoom;
-	normalized.z *= zoom;
-	//vec3_add(from, &normalized);
-	from->x += normalized.x;
-	from->y += normalized.y;
-	from->z += normalized.z;
+	vec3_mul(&normalized, zoom);
+	vec3_add(from, &normalized);
 	
 	render_scene_again_and_refresh_canvas();
 	return IUP_DEFAULT;
