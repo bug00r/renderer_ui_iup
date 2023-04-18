@@ -1,60 +1,47 @@
-MAKE?=make
-AR?=ar
 ARFLAGS?=rcs
 PATHSEP?=/
-CC=gcc
 BUILDROOT?=build
-
-ifeq ($(CLANG),1)
-	export CC=clang
-endif
 
 BUILDDIR?=$(BUILDROOT)$(PATHSEP)$(CC)
 BUILDPATH?=$(BUILDDIR)$(PATHSEP)
 
-INSTALL_ROOT?=$(BUILDPATH)
-
-ifeq ($(DEBUG),1)
-	export debug=-ggdb -Ddebug=1
-	export isdebug=1
+ifndef PREFIX
+	INSTALL_ROOT=$(BUILDPATH)
+else
+	INSTALL_ROOT=$(PREFIX)$(PATHSEP)
+	ifeq ($(INSTALL_ROOT),/)
+	INSTALL_ROOT=$(BUILDPATH)
+	endif
 endif
 
-ifeq ($(ANALYSIS),1)
-	export analysis=-Danalysis=1
-	export isanalysis=1
+ifdef DEBUG
+	CFLAGS+=-ggdb
+	ifeq ($(DEBUG),)
+	CFLAGS+=-Ddebug=1
+	else 
+	CFLAGS+=-Ddebug=$(DEBUG)
+	endif
 endif
 
-ifeq ($(DEBUG),2)
-	export debug=-ggdb -Ddebug=2
-	export isdebug=1
+ifeq ($(M32),1)
+	CFLAGS+=-m32
+	BIT_SUFFIX+=32
 endif
 
-ifeq ($(DEBUG),3)
-	export debug=-ggdb -Ddebug=3
-	export isdebug=1
-endif
+CFLAGS=-std=c11 -O1
 
-ifeq ($(OUTPUT),1)
-	export outimg= -Doutput=1
-endif
-
-CFLAGS=-std=c11 -O1 $(debug)
-
-LIB?=-L/c/dev/lib
-INCLUDE?=-I/c/dev/include -I.
-
-#-Wpedantic -pedantic-errors -Wall -Wextra -O1 $(debug) $(analysis)
+#-Wpedantic -pedantic-errors -Wall -Wextra -O1
 #-ggdb  -mwindows
 #-pg for profiling 
 
-INCLUDEDIR=-I. $(INCLUDE)
-
+LDFLAGS+=-L/c/dev/lib
+CFLAGS+=-I/c/dev/include -I.
 
 _SRC_FILES=test_renderer_ui_iup app iup_app plugin plugin_ui_main plugin_ui_renderer plugin_ui_texturing plugin_ui_gfx_algo_test font_provider_default
 TESTSRC=$(patsubst %,src/%,$(patsubst %,%.c,$(_SRC_FILES)))
 TESTSRC+=$(patsubst %,src/%,$(patsubst %,%.h,$(_SRC_FILES)))
 
-TESTBIN=test_renderer_ui_iup.exe
+TESTBIN=$(BUILDPATH)test_renderer_ui_iup.exe
 
 RENDERER_LIBS= r_font iup_xml_builder geometry renderer scene mesh shape texture noise fractals crgb_array farray array color statistics utilsmath mat vec dl_list utils
 IUP_LIBS=cdcontextplus gdiplus im iupcd iup cd
@@ -63,9 +50,8 @@ OS_LIBS=kernel32 user32 gdi32 winspool comdlg32 advapi32 shell32 uuid ole32 olea
 
 CFLAGS+=-DPCRE2_STATIC -DIN_LIBXML
 
-TESTLIB=$(patsubst %,-l%,$(RENDERER_LIBS) $(IUP_LIBS) $(THIRD_PARTY_LIBS) $(OS_LIBS))
-
-TESTLIBDIR=-L$(BUILDDIR) $(LIB) 
+LDFLAGS+=-L$(BUILDDIR)
+LDFLAGS+=$(patsubst %,-l%,$(RENDERER_LIBS) $(IUP_LIBS) $(THIRD_PARTY_LIBS) $(OS_LIBS))
 
 RES=zip_resource
 RES_O=$(RES).o
@@ -76,10 +62,10 @@ ZIP=7z
 ZIP_ARGS=a -t7z
 ZIP_CMD=$(ZIP) $(ZIP_ARGS)
 
-all: mkbuilddir mkzip addzip $(BUILDPATH)$(TESTBIN)
+all: mkbuilddir mkzip addzip $(TESTBIN)
 	
-$(BUILDPATH)$(TESTBIN): $(TESTSRC)
-	$(CC) $(CFLAGS) $(TESTSRC) $(RES_O_PATH) -o $(BUILDPATH)$(TESTBIN) $(INCLUDEDIR) $(TESTLIBDIR) $(TESTLIB)
+$(TESTBIN): $(TESTSRC)
+	$(CC) $(CFLAGS) $(TESTSRC) $(RES_O_PATH) -o $(TESTBIN) $(LDFLAGS)
 	
 .PHONY: clean mkbuilddir
 
