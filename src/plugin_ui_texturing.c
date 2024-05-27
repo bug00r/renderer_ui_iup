@@ -1,17 +1,17 @@
 #include "plugin_ui_texturing.h"
 
 #define CANVAS_SIZE 513
-void texture_manipulation_brigthness_contrast(texture_t * texture)
+void texture_manipulation_brigthness_contrast(Texture * texture)
 {
-	array_iterator_t * it = array_iterator_new(texture->buffer);
-	cRGB_t * curcolor;
-	cRGB_t temp;
+	ArrayIterator * it = array_iterator_new(texture->buffer);
+	ColorRGB * curcolor;
+	ColorRGB temp;
 	
 	float contrast_factor = crgb_contrast_factor_255(seedrndlh(75.f, 80.f));
 	float brightness = seedrndlh(-35.f, -25.f);
 	while(array_iterator_has_next(it))
 	{
-		curcolor = (cRGB_t *)array_iterator_next(it);
+		curcolor = (ColorRGB *)array_iterator_next(it);
 		crgb_brightness_255_dest(&temp, curcolor, brightness);
 		crgb_contrast_255_dest(curcolor, &temp, contrast_factor);
 	}
@@ -19,12 +19,12 @@ void texture_manipulation_brigthness_contrast(texture_t * texture)
 }
 
 
-static void convertTexture_iupCanvas(render_texture_context_t * rtctx, cdCanvas * canvas) 
+static void convertTexture_iupCanvas(RenderTextureContext * rtctx, cdCanvas * canvas) 
 {
-	texture_t * texture = rtctx->texture;
+	Texture * texture = rtctx->texture;
 
-	cRGB_t * cref;
-	array_error_t array_res;
+	ColorRGB * cref;
+	ArrayError array_res;
 	
 	for (unsigned int h = 0; h < texture->height; ++h){
 	  unsigned int ch = ((texture->height-1) - h);
@@ -45,11 +45,11 @@ static void convertTexture_iupCanvas(render_texture_context_t * rtctx, cdCanvas 
 
 static void process_texture_ds() {
 	printf("process diamond square\n");
-	render_texture_context_t * rtctx = (render_texture_context_t *)IupGetGlobal("RTCTX");
+	RenderTextureContext * rtctx = (RenderTextureContext *)IupGetGlobal("RTCTX");
 	int w = CANVAS_SIZE;
 	int h = CANVAS_SIZE;
-	noise_t * noise = rtctx->noise;
-	diamond_square_t ds_param;
+	Noise * noise = rtctx->noise;
+	DiamondSquare ds_param;
 	float maxreduction = IupGetFloat(IupGetHandle("seed"), "VALUE");
 //	printf("seed: %f", maxreduction);
 	float reduction = IupGetFloat(IupGetHandle("reduction"), "VALUE");//maxreduction/((w-1)*(w-1));
@@ -77,11 +77,11 @@ static void process_texture_ds() {
 
 static void process_texture_md() {
 	printf("process midpoint displacement\n");
-	render_texture_context_t * rtctx = (render_texture_context_t *)IupGetGlobal("RTCTX");
+	RenderTextureContext * rtctx = (RenderTextureContext *)IupGetGlobal("RTCTX");
 	int w = CANVAS_SIZE;
 	int h = CANVAS_SIZE;
-	noise_t * noise = rtctx->noise;
-	midpoint_displacement_t md_param;
+	Noise * noise = rtctx->noise;
+	MidpointDisplacement md_param;
 	float maxreduction = IupGetFloat(IupGetHandle("seed"), "VALUE");
 //	printf("seed: %f", maxreduction);
 	float reduction = IupGetFloat(IupGetHandle("reduction"), "VALUE");//maxreduction/((w-1)*(w-1))
@@ -128,13 +128,13 @@ void create_texture()
 	int algorithm = IupGetInt(tex_algo_list, "VALUE");
 	
 	if ( --algorithm >= 0 ) {
-		render_texture_context_t * rtctx = (render_texture_context_t *)IupGetGlobal("RTCTX");
+		RenderTextureContext * rtctx = (RenderTextureContext *)IupGetGlobal("RTCTX");
 		tex_algorithm_t * algo = &rtctx->algorithm[algorithm];
 		if (algo->name && algo->func) {
 			algo->func();
-			noise_t * noise = rtctx->noise;
-			texture_t * texture = rtctx->texture;
-			noise_to_texture( noise, texture);
+			Noise * noise = rtctx->noise;
+			Texture * texture = rtctx->texture;
+			Noiseo_texture( noise, texture);
 			
 			//texture filtering
 			Ihandle * m_list = IupGetHandle("texture_filter_list");
@@ -168,7 +168,7 @@ void create_texture()
 static void render_texture_canvas(cdCanvas * _canvas)
 {
 	cdCanvas *canvas = _canvas;
-	render_texture_context_t * rtctx = (render_texture_context_t *)IupGetGlobal("RTCTX");
+	RenderTextureContext * rtctx = (RenderTextureContext *)IupGetGlobal("RTCTX");
 	
 	if ( canvas != NULL && rtctx != NULL)
 	{
@@ -401,7 +401,7 @@ static void _texture_init_(void * data) {
 	texture_ctx_t * mctx = (texture_ctx_t *)data;
 	mctx->frame=NULL;
 	
-	render_texture_context_t * rtctx = malloc(sizeof(render_texture_context_t));
+	RenderTextureContext * rtctx = malloc(sizeof(RenderTextureContext));
 	int w = CANVAS_SIZE;
 	int h = CANVAS_SIZE;
 	rtctx->texture = texture_new(w,h);
@@ -460,7 +460,7 @@ static void _texture_init_(void * data) {
 
 static void _texture_free_(void * data) {
 	printf("texture free\n");
-	render_texture_context_t * rtctx = (render_texture_context_t *)IupGetGlobal("RTCTX");
+	RenderTextureContext * rtctx = (RenderTextureContext *)IupGetGlobal("RTCTX");
 	if (rtctx) {
 		texture_free(rtctx->texture);
 		noise_free(rtctx->noise);
@@ -494,7 +494,7 @@ void * _texture_frame_(void * data) {
 
 void _texture_prepare_(void * data) {
 	printf("handle texture prepare\n");
-	render_texture_context_t * rtctx = (render_texture_context_t *)IupGetGlobal("RTCTX");
+	RenderTextureContext * rtctx = (RenderTextureContext *)IupGetGlobal("RTCTX");
 	Ihandle * tex_algo_list = IupGetHandle("texture_algo_list");
 	for(unsigned int i = 0; rtctx->algorithm[i].name ; i++) {
 		IupSetAttribute(tex_algo_list, "APPENDITEM", rtctx->algorithm[i].name);
@@ -545,7 +545,7 @@ void _texture_cleanup_(void * data) {
 	void (*prepare)(void * data);
 	void (*cleanup)(void * data);
 */
-plugin_t * texture_plugin(plugin_t * plugin) {
+Plugin * texture_plugin(Plugin * plugin) {
 	plugin->name = _texture_name_;
 	plugin->frame = _texture_frame_;
 	plugin->init = _texture_init_;

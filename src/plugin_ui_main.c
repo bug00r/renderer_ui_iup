@@ -9,9 +9,9 @@ static void _main_init_(void * data) {
 	#endif
 	main_ctx_t * mctx = (main_ctx_t *)data;
 	mctx->cntplugins = 3;
-	mctx->plugins = malloc( mctx->cntplugins * sizeof(plugin_t));
+	mctx->plugins = malloc( mctx->cntplugins * sizeof(Plugin));
 	
-	plugin_t *plugin = &mctx->plugins[0];
+	Plugin *plugin = &mctx->plugins[0];
 	render_plugin(plugin);
 	plugin->init(plugin->data);
 	
@@ -59,7 +59,7 @@ static Ihandle *create_file_menu() {
 	return submenu;
 }
 
-static void create_andor_open_plugin(plugin_t * plugin) {
+static void create_andor_open_plugin(Plugin * plugin) {
 	const char * pName = plugin->name(NULL);
 	printf("create_andor_open_plugin %s\n", pName);
 	Ihandle *tabs = IupGetHandle("tabs");
@@ -101,7 +101,7 @@ static void create_andor_open_plugin(plugin_t * plugin) {
 }
 
 static int plugin_cb(Ihandle * handle) {
-	plugin_t * plugin = (plugin_t *)IupGetAttribute(handle, "PLUGIN_OBJ");
+	Plugin * plugin = (Plugin *)IupGetAttribute(handle, "PLUGIN_OBJ");
 	if ( plugin ) {
 		create_andor_open_plugin(plugin);
 	}
@@ -186,7 +186,7 @@ void _main_cleanup_(void * data) {
 	}	
 }
 
-plugin_t * main_plugin(plugin_t * plugin) {
+Plugin * main_plugin(Plugin * plugin) {
 	plugin->name = _main_name_;
 	plugin->frame = _main_frame_;
 	plugin->init = _main_init_;

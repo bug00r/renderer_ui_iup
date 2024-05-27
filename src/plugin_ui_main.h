@@ -23,9 +23,9 @@
 typedef struct _main_ctx_ {
 	Ihandle *frame;
 	unsigned int cntplugins;
-	plugin_t * plugins;
+	Plugin * plugins;
 } main_ctx_t;
 
-plugin_t * main_plugin(plugin_t * plugin);
+Plugin * main_plugin(Plugin * plugin);
 
 #endif

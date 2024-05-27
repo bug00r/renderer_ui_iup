@@ -9,7 +9,7 @@ static void _gfx_algo_test_init_(void * data) {
 			All needed things:
 		  */
 	#endif
-	gfx_algo_test_ctx_t * mctx = (gfx_algo_test_ctx_t *)data;
+	GfxAlgoTestCtx * mctx = (GfxAlgoTestCtx *)data;
 	
 	mctx->frame=NULL;
 }
@@ -19,7 +19,7 @@ static void _gfx_algo_test_free_(void * data) {
 		/** remove all special allocated things from init method..
 		  */
 	#endif
-	gfx_algo_test_ctx_t * mctx = (gfx_algo_test_ctx_t *)data;
+	GfxAlgoTestCtx * mctx = (GfxAlgoTestCtx *)data;
 	free(mctx);
 }
 
@@ -34,7 +34,7 @@ int on_gfx_algo_changed(Ihandle *ih, char *text, int item, int state) {
 	if ( state == 1 ) {
 		printf("%s\n", text);
 		Ihandle *algoparam = (Ihandle *)IupGetAttribute(ih, "algoparameter");
-		gfx_algo_test_ctx_t *ctx = (gfx_algo_test_ctx_t *)IupGetAttribute(ih, "GFXCTX");
+		GfxAlgoTestCtx *ctx = (GfxAlgoTestCtx *)IupGetAttribute(ih, "GFXCTX");
 		
 		if ( algoparam != NULL && ctx != NULL ) {
 			printf("set cur algo\n");
@@ -50,7 +50,7 @@ static void gfx_draw_on_canvas(int32_t const * const x, int32_t const * const y,
 	cdCanvasPixel((cdCanvas *)data, *x, cdCanvasInvertYAxis((cdCanvas *)data, *y), 0);
 }
 
-static void gfx_draw_bezier_on_canvas(vec2_t const * const p1, vec2_t const * const p2, void *data) {
+static void gfx_draw_bezier_on_canvas(Vec2 const * const p1, Vec2 const * const p2, void *data) {
 	//cdCanvasPixel((cdCanvas *)data, *x, cdCanvasInvertYAxis((cdCanvas *)data, *y), 0);
 	cdCanvasLine((cdCanvas *)data, (int)p1->x, (int)p1->y, (int)p2->x, (int)p2->y);
 }
@@ -58,8 +58,8 @@ static void gfx_draw_bezier_on_canvas(vec2_t const * const p1, vec2_t const * co
 static void _gfx_algo_test_draw_line_trigger(Ihandle *_ih) {
 	Ihandle *ih = _ih;
 
-	vec2_t start = { IupGetInt((Ihandle *)IupGetAttribute(ih, "lx0"), "SPINVALUE"), IupGetInt((Ihandle *)IupGetAttribute(ih, "ly0"), "SPINVALUE") };
-	vec2_t end = { IupGetInt((Ihandle *)IupGetAttribute(ih, "lx1"), "SPINVALUE"), IupGetInt((Ihandle *)IupGetAttribute(ih, "ly1"), "SPINVALUE") };
+	Vec2 start = { IupGetInt((Ihandle *)IupGetAttribute(ih, "lx0"), "SPINVALUE"), IupGetInt((Ihandle *)IupGetAttribute(ih, "ly0"), "SPINVALUE") };
+	Vec2 end = { IupGetInt((Ihandle *)IupGetAttribute(ih, "lx1"), "SPINVALUE"), IupGetInt((Ihandle *)IupGetAttribute(ih, "ly1"), "SPINVALUE") };
 
 	void * data = IupGetAttribute((Ihandle*)IupGetAttribute(ih, "gfx_canvas"), "GFX_TEST_CD_CANVAS_DBUFFER");
 	geometry_line(&start, &end, gfx_draw_on_canvas, data);
@@ -68,7 +68,7 @@ static void _gfx_algo_test_draw_line_trigger(Ihandle *_ih) {
 static void _gfx_algo_test_draw_circle_trigger(Ihandle *_ih) {
 	Ihandle *ih = _ih;
 
-	vec2_t center = { IupGetInt((Ihandle *)IupGetAttribute(ih, "cx"), "SPINVALUE"), IupGetInt((Ihandle *)IupGetAttribute(ih, "cy"), "SPINVALUE") };
+	Vec2 center = { IupGetInt((Ihandle *)IupGetAttribute(ih, "cx"), "SPINVALUE"), IupGetInt((Ihandle *)IupGetAttribute(ih, "cy"), "SPINVALUE") };
 	int32_t radius = IupGetInt((Ihandle *)IupGetAttribute(ih, "cr"), "SPINVALUE");
  
 	void * data = IupGetAttribute((Ihandle*)IupGetAttribute(ih, "gfx_canvas"), "GFX_TEST_CD_CANVAS_DBUFFER");
@@ -81,7 +81,7 @@ static void _gfx_algo_test_draw_ellipse_trigger(Ihandle *_ih) {
 	
 	Ihandle *ih = _ih;
 
-	vec2_t center = { IupGetInt((Ihandle *)IupGetAttribute(ih, "ex"), "SPINVALUE"), IupGetInt((Ihandle *)IupGetAttribute(ih, "ey"), "SPINVALUE") };
+	Vec2 center = { IupGetInt((Ihandle *)IupGetAttribute(ih, "ex"), "SPINVALUE"), IupGetInt((Ihandle *)IupGetAttribute(ih, "ey"), "SPINVALUE") };
 	int32_t a = IupGetInt((Ihandle *)IupGetAttribute(ih, "ea"), "SPINVALUE");
 	int32_t b = IupGetInt((Ihandle *)IupGetAttribute(ih, "eb"), "SPINVALUE");
  
@@ -95,9 +95,9 @@ static void _gfx_algo_test_draw_bezier1_trigger(Ihandle *_ih) {
 
 	Ihandle *ih = _ih;
 
-	vec2_t start = {IupGetInt((Ihandle *)IupGetAttribute(ih, "bsx"), "SPINVALUE"), IupGetInt((Ihandle *)IupGetAttribute(ih, "bsy"), "SPINVALUE")};
-	vec2_t cp = {IupGetInt((Ihandle *)IupGetAttribute(ih, "bcx"), "SPINVALUE"), IupGetInt((Ihandle *)IupGetAttribute(ih, "bcy"), "SPINVALUE")};
-	vec2_t end = {IupGetInt((Ihandle *)IupGetAttribute(ih, "bex"), "SPINVALUE"), IupGetInt((Ihandle *)IupGetAttribute(ih, "bey"), "SPINVALUE")};
+	Vec2 start = {IupGetInt((Ihandle *)IupGetAttribute(ih, "bsx"), "SPINVALUE"), IupGetInt((Ihandle *)IupGetAttribute(ih, "bsy"), "SPINVALUE")};
+	Vec2 cp = {IupGetInt((Ihandle *)IupGetAttribute(ih, "bcx"), "SPINVALUE"), IupGetInt((Ihandle *)IupGetAttribute(ih, "bcy"), "SPINVALUE")};
+	Vec2 end = {IupGetInt((Ihandle *)IupGetAttribute(ih, "bex"), "SPINVALUE"), IupGetInt((Ihandle *)IupGetAttribute(ih, "bey"), "SPINVALUE")};
 
 	vec2_print(&start);
 	vec2_print(&cp);
@@ -113,10 +113,10 @@ static void _gfx_algo_test_draw_bezier1_trigger(Ihandle *_ih) {
 static void _gfx_algo_test_draw_bezier2_trigger(Ihandle *_ih) {
 	Ihandle *ih = _ih;
 
-	vec2_t start = {IupGetInt((Ihandle *)IupGetAttribute(ih, "b2sx"), "SPINVALUE"), IupGetInt((Ihandle *)IupGetAttribute(ih, "b2sy"), "SPINVALUE")};
-	vec2_t cp = {IupGetInt((Ihandle *)IupGetAttribute(ih, "b2cx"), "SPINVALUE"), IupGetInt((Ihandle *)IupGetAttribute(ih, "b2cy"), "SPINVALUE")};
-	vec2_t cp2 = {IupGetInt((Ihandle *)IupGetAttribute(ih, "b2cx2"), "SPINVALUE"), IupGetInt((Ihandle *)IupGetAttribute(ih, "b2cy2"), "SPINVALUE")};
-	vec2_t end = {IupGetInt((Ihandle *)IupGetAttribute(ih, "b2ex"), "SPINVALUE"), IupGetInt((Ihandle *)IupGetAttribute(ih, "b2ey"), "SPINVALUE")};
+	Vec2 start = {IupGetInt((Ihandle *)IupGetAttribute(ih, "b2sx"), "SPINVALUE"), IupGetInt((Ihandle *)IupGetAttribute(ih, "b2sy"), "SPINVALUE")};
+	Vec2 cp = {IupGetInt((Ihandle *)IupGetAttribute(ih, "b2cx"), "SPINVALUE"), IupGetInt((Ihandle *)IupGetAttribute(ih, "b2cy"), "SPINVALUE")};
+	Vec2 cp2 = {IupGetInt((Ihandle *)IupGetAttribute(ih, "b2cx2"), "SPINVALUE"), IupGetInt((Ihandle *)IupGetAttribute(ih, "b2cy2"), "SPINVALUE")};
+	Vec2 end = {IupGetInt((Ihandle *)IupGetAttribute(ih, "b2ex"), "SPINVALUE"), IupGetInt((Ihandle *)IupGetAttribute(ih, "b2ey"), "SPINVALUE")};
 
 	void * data = IupGetAttribute((Ihandle*)IupGetAttribute(ih, "gfx_canvas"), "GFX_TEST_CD_CANVAS_DBUFFER");
 
@@ -127,13 +127,13 @@ static void _gfx_algo_test_draw_bezier2_trigger(Ihandle *_ih) {
 
 typedef struct {
     cdCanvas *canvas;
-    vec2_t charPos;
+    Vec2 charPos;
 } __gfx_algo_render_txt_ctx_t;
 
 static void __rf_text_render_func(float const * const x, float const * const y, void *data)
 {
     __gfx_algo_render_txt_ctx_t *ctx = data;
-    vec2_t *charPos = &ctx->charPos;
+    Vec2 *charPos = &ctx->charPos;
 
     long used_x = charPos->x + *x;
     long used_y = charPos->y + *y;
@@ -148,12 +148,12 @@ static void _gfx_algo_test_render_text_trigger(Ihandle *_ih) {
 	char* text = IupGetAttribute((Ihandle *)IupGetAttribute(ih, "rftxt"), "VALUE");
 	cdCanvas *canvas = (cdCanvas*)IupGetAttribute((Ihandle*)IupGetAttribute(ih, "gfx_canvas"), "GFX_TEST_CD_CANVAS_DBUFFER");
 
-	rf_provider_t* provider = get_default_provider();
+	RFProvider* provider = get_default_provider();
 
-    rf_ctx_t rf_ctx;
+    RFCtx rf_ctx;
     rfont_init(&rf_ctx, provider);
 
-	vec2_t charPos = { IupGetFloat((Ihandle *)IupGetAttribute(ih, "rfposx"), "SPINVALUE") , 
+	Vec2 charPos = { IupGetFloat((Ihandle *)IupGetAttribute(ih, "rfposx"), "SPINVALUE") , 
 					   IupGetFloat((Ihandle *)IupGetAttribute(ih, "rfposy"), "SPINVALUE")};
 	__gfx_algo_render_txt_ctx_t renderCtx = {canvas, charPos}; 
 
@@ -162,7 +162,7 @@ static void _gfx_algo_test_render_text_trigger(Ihandle *_ih) {
 
 static int on_gfx_trigger_drawing(Ihandle* ih) {
 
-	gfx_algo_test_ctx_t *ctx = (gfx_algo_test_ctx_t *)IupGetAttribute(ih, "GFXCTX");
+	GfxAlgoTestCtx *ctx = (GfxAlgoTestCtx *)IupGetAttribute(ih, "GFXCTX");
 
 	if ( ctx != NULL && ctx->cur_algo != NULL ) {
 		DRAW_TRIGGER trigger = (DRAW_TRIGGER)IupGetAttribute(ctx->cur_algo, "drawtrigger");
@@ -210,7 +210,7 @@ void * _gfx_algo_test_frame_(void * data) {
 		printf("main frame\n");
 	#endif
 	
-	gfx_algo_test_ctx_t * mctx = (gfx_algo_test_ctx_t *)data;
+	GfxAlgoTestCtx * mctx = (GfxAlgoTestCtx *)data;
 	Ihandle * frame = mctx->frame;
 	if ( mctx->frame == NULL ) {
 		archive_resource_t* ar = archive_resource_memory(&_binary_zip_resource_7z_start, (size_t)&_binary_zip_resource_7z_size);
@@ -249,20 +249,20 @@ void * _gfx_algo_test_frame_(void * data) {
 
 void _gfx_algo_test_prepare_(void * data) {
 	//init plugins here
-	gfx_algo_test_ctx_t * mctx = (gfx_algo_test_ctx_t *)data;
+	GfxAlgoTestCtx * mctx = (GfxAlgoTestCtx *)data;
 }
 
 void _gfx_algo_test_cleanup_(void * data) {
-	gfx_algo_test_ctx_t * mctx = (gfx_algo_test_ctx_t *)data;	
+	GfxAlgoTestCtx * mctx = (GfxAlgoTestCtx *)data;	
 }
 
-plugin_t * gfx_algo_test_plugin(plugin_t * plugin) {
+Plugin * gfx_algo_test_plugin(Plugin * plugin) {
 	plugin->name	= _gfx_algo_test_name_;
 	plugin->frame	= _gfx_algo_test_frame_;
 	plugin->init	= _gfx_algo_test_init_;
 	plugin->free 	= _gfx_algo_test_free_;
 	plugin->prepare = _gfx_algo_test_prepare_;
 	plugin->cleanup = _gfx_algo_test_cleanup_;
-	plugin->data 	= malloc(sizeof(gfx_algo_test_ctx_t)); //here malloc
+	plugin->data 	= malloc(sizeof(GfxAlgoTestCtx)); //here malloc
 	return plugin;
 }

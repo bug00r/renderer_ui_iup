@@ -18,6 +18,6 @@ typedef struct _proto_ctx_ {
 	Ihandle *frame;
 } proto_ctx_t;
 
-plugin_t * proto_plugin(plugin_t * plugin);
+Plugin * proto_plugin(Plugin * plugin);
 
 #endif

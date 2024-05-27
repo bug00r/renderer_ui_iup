@@ -20,8 +20,8 @@
 
 typedef struct _render_ctx_ {
 	Ihandle *frame;
-} render_ctx_t;
+} RenderCtx;
 
-plugin_t * render_plugin(plugin_t * plugin);
+Plugin * render_plugin(Plugin * plugin);
 
 #endif

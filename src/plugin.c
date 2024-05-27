@@ -1,7 +1,7 @@
 #include "plugin.h"
 
-plugin_t * new_plugin() {
-	plugin_t * new_plugin = malloc(sizeof(plugin_t));
+Plugin * new_plugin() {
+	Plugin * new_plugin = malloc(sizeof(Plugin));
 	new_plugin->name = NULL;
 	new_plugin->frame = NULL;
 	new_plugin->init = NULL;
@@ -11,6 +11,6 @@ plugin_t * new_plugin() {
 	new_plugin->cleanup = NULL;
 	return new_plugin;
 }
-void free_plugin(plugin_t * plugin) {
+void free_plugin(Plugin * plugin) {
 	free(plugin);
 }

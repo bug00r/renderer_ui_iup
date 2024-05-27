@@ -1,11 +1,11 @@
 #include "plugin_ui_renderer.h"
 
 typedef struct {
-	renderer_t *renderer;
-	scene_t *scene;
-	vec3_t from, to;
+	Renderer *renderer;
+	Scene *scene;
+	Vec3 from, to;
 	float l,r,t,b,f,n;
-	cRGB_t  bgcolor;
+	ColorRGB  bgcolor;
 	Ihandle* cam_from[3];
 	Ihandle* cam_to[3];
 	Ihandle* cam_left[3];
@@ -13,24 +13,24 @@ typedef struct {
 	Ihandle* cam_forward[3];
 	Ihandle* mat4_view[16];
 	Ihandle* mat4_proj[16];
-	Ihandle* mat4_trans[16];
+	Ihandle* Mat4rans[16];
 	Ihandle* frustum_near[15];
 	Ihandle* frustum_far[15];
 	Ihandle* frustum_left[15];
 	Ihandle* frustum_right[15];
 	Ihandle* frustum_top[15];
 	Ihandle* frustum_bottom[15];
-} render_context_t;
+} RenderContext;
 
-static void convertFramebuffer_iupCanvas(renderer_t * renderer, cdCanvas * canvas) 
+static void convertFramebuffer_iupCanvas(Renderer * renderer, cdCanvas * canvas) 
 {
 	unsigned int bi=0, samplestart;
 	int i, j, cj, imgW = renderer->imgWidth, 
 				  imgH = renderer->imgHeight;
 	const int us = renderer->used_samples, bw = renderer->bufWidth;
-	cRGB_t fc;
-	cRGB_t * fb = renderer->frameBuffer;
-	cRGB_t * c = fb;
+	ColorRGB fc;
+	ColorRGB * fb = renderer->frameBuffer;
+	ColorRGB * c = fb;
 
 	for (j = imgH; j--; )
     {
@@ -59,7 +59,7 @@ static void convertFramebuffer_iupCanvas(renderer_t * renderer, cdCanvas * canva
 
 }
 
-static void update_debug_mat4(Ihandle **targets, mat4_t *data) {
+static void update_debug_mat4(Ihandle **targets, Mat4 *data) {
 	IupSetFloat(targets[0], "TITLE", data->_11);
 	IupSetFloat(targets[1], "TITLE", data->_12);
 	IupSetFloat(targets[2], "TITLE", data->_13);
@@ -78,15 +78,15 @@ static void update_debug_mat4(Ihandle **targets, mat4_t *data) {
 	IupSetFloat(targets[15], "TITLE", data->_44);
 }
 
-static void update_debug_vec3(Ihandle **targets, vec3_t *data) {
+static void update_debug_vec3(Ihandle **targets, Vec3 *data) {
 	IupSetFloat(targets[0], "TITLE", data->x);
 	IupSetFloat(targets[1], "TITLE", data->y);
 	IupSetFloat(targets[2], "TITLE", data->z);
 }
 
-static void update_debug_frustum_plane(Ihandle **targets, plane_t *plane)
+static void update_debug_frustum_plane(Ihandle **targets, Plane *plane)
 {
-	vec3_t *vec = &plane->lt;
+	Vec3 *vec = &plane->lt;
 	IupSetFloat(targets[0], "TITLE", vec->x);
 	IupSetFloat(targets[1], "TITLE", vec->y);
 	IupSetFloat(targets[2], "TITLE", vec->z);
@@ -112,9 +112,9 @@ static void update_debug_frustum_plane(Ihandle **targets, plane_t *plane)
 	IupSetFloat(targets[14], "TITLE", vec->z);
 }
 
-static void update_debug_view(renderer_t* renderer) {
-	camera_t *cam = &renderer->camera;
-	render_context_t * rctx = (render_context_t *)IupGetGlobal("RCTX");
+static void update_debug_view(Renderer* renderer) {
+	Camera *cam = &renderer->camera;
+	RenderContext * rctx = (RenderContext *)IupGetGlobal("RCTX");
 
 	update_debug_vec3(&rctx->cam_from[0], &cam->from);
 	update_debug_vec3(&rctx->cam_to[0], &cam->to);
@@ -124,7 +124,7 @@ static void update_debug_view(renderer_t* renderer) {
 
 	update_debug_mat4(&rctx->mat4_view[0], &cam->view);
 	update_debug_mat4(&rctx->mat4_proj[0], &cam->projection);
-	update_debug_mat4(&rctx->mat4_trans[0], &cam->transformation);
+	update_debug_mat4(&rctx->Mat4rans[0], &cam->transformation);
 
 	update_debug_frustum_plane(&rctx->frustum_near[0], &cam->frustum.near);
 	update_debug_frustum_plane(&rctx->frustum_far[0], &cam->frustum.far);
@@ -136,16 +136,16 @@ static void update_debug_view(renderer_t* renderer) {
 
 void render_scence_again()
 {
-	render_context_t * rctx = (render_context_t *)IupGetGlobal("RCTX");
-	renderer_t * renderer = rctx->renderer;
-	camera_t * curcam = &renderer->camera;
-	scene_t * scene = rctx->scene;
-	vec3_t * from = &rctx->from;
-	vec3_t * to = &rctx->to;
+	RenderContext * rctx = (RenderContext *)IupGetGlobal("RCTX");
+	Renderer * renderer = rctx->renderer;
+	Camera * curcam = &renderer->camera;
+	Scene * scene = rctx->scene;
+	Vec3 * from = &rctx->from;
+	Vec3 * to = &rctx->to;
 
 	camera_lookAt(curcam, from, to);
 	//printf("NEW CAM POSITION\n\n");
-	//print_camera((const camera_t *)curcam);
+	//print_camera((const Camera *)curcam);
 	mat4_mul_dest(&curcam->transformation ,&curcam->view, &curcam->projection);
 	renderer_clear_frame(renderer);
 	render_scene(renderer, scene);
@@ -155,8 +155,8 @@ void render_scence_again()
 static void render_canvas(cdCanvas * _canvas)
 {
 	cdCanvas *canvas = _canvas;
-	render_context_t * rctx = (render_context_t *)IupGetGlobal("RCTX");
-	renderer_t *renderer = rctx->renderer;
+	RenderContext * rctx = (RenderContext *)IupGetGlobal("RCTX");
+	Renderer *renderer = rctx->renderer;
 	
 	if ( canvas != NULL && renderer != NULL)
 	{
@@ -184,16 +184,16 @@ static void render_scene_again_and_refresh_canvas()
 	__refresh_canvas();
 }
 
-static scene_t* __renderer_textured_cube(renderer_t *_renderer)
+static Scene* __Rendererextured_cube(Renderer *_renderer)
 {
-	renderer_t * renderer = _renderer;
+	Renderer * renderer = _renderer;
 
 	unsigned int w_ = 512;
 	unsigned int h_ = 512;
 	
-	texture_t * texture_fractals = texture_new(w_,h_);
+	Texture * texture_fractals = texture_new(w_,h_);
 	
-	mandelbrot_t *mb = mandelbrot_new(w_, h_);
+	Mandelbrot *mb = mandelbrot_new(w_, h_);
 	mb->minreal = -2.f;//-1.3f;
 	mb->maxreal = 0.5f;//-1.f;
 	mb->minimag = -1.f;//-.3f;
@@ -201,23 +201,23 @@ static scene_t* __renderer_textured_cube(renderer_t *_renderer)
 	mb->cntiterations = 20;
 	create_mandelbrot(mb);
 	
-	mandelbrot_to_texture(mb, texture_fractals, mandelbrot_color_line_int_rgb);
+	Mandelbroto_texture(mb, texture_fractals, mandelbrot_color_line_int_rgb);
 
 	int texId = texture_cache_register(renderer->texture_cache, texture_fractals);
     
 	mandelbrot_free(mb);
 
-	return scene_create_texture_test();
+	return scene_create_Textureest();
 }
 
-static render_context_t* create_test_renderer()
+static RenderContext* create_test_renderer()
 {
 	printf("create_test_renderer\n");
-	render_context_t * render_ctx = malloc(sizeof(render_context_t));
-	render_ctx->bgcolor = (cRGB_t){0.7f, 0.7f, 0.7f};
-	render_ctx->from = (vec3_t){-3.5f, 3.f, -4.5f };
-	//render_ctx->from = (vec3_t){0.f, 0.f, 2.0f }; //perspective
-	render_ctx->to = (vec3_t){0.f, 0.0f, 0.0f};
+	RenderContext * render_ctx = malloc(sizeof(RenderContext));
+	render_ctx->bgcolor = (ColorRGB){0.7f, 0.7f, 0.7f};
+	render_ctx->from = (Vec3){-3.5f, 3.f, -4.5f };
+	//render_ctx->from = (Vec3){0.f, 0.f, 2.0f }; //perspective
+	render_ctx->to = (Vec3){0.f, 0.0f, 0.0f};
 	render_ctx->renderer = renderer_new(512, 512, &render_ctx->bgcolor, 2);
 	render_ctx->renderer->projection = RP_PERSPECTIVE;
 	float view = 1.5f;
@@ -227,8 +227,8 @@ static render_context_t* create_test_renderer()
 	render_ctx->b = -view;
 	render_ctx->f = 3.5f;
 	render_ctx->n = 0.2f;
-	scene_t * scene;
-	texture_cache_t *texCache = render_ctx->renderer->texture_cache;
+	Scene * scene;
+	TextureCache *texCache = render_ctx->renderer->texture_cache;
 	float waterfall_data[240] = { 
 		//0.000000f,0.000000f,0.000000f,0.000000f,0.000000f,0.000000f,0.000000f,0.000000f,0.000000f,0.000000f,0.000000f,0.000000f,0.000000f,0.000000f,0.000000f,0.000000f,0.000000f,0.000000f,0.000000f,0.000000f,0.000000f,0.000000f,0.000000f,0.000000f,0.000000f,0.000000f,0.000000f,0.000000f,0.000000f,0.000000f,0.000000f,0.000000f,0.000000f,0.000000f,0.000000f,0.000000f,0.000000f,0.000000f,0.000000f,0.000000f,0.000000f,0.000000f,0.000000f,0.000000f,0.000000f,0.000000f,0.000000f,0.000000f,0.000000f,0.000000f,0.000000f,0.000000f,0.000000f,0.000000f,0.000000f,0.000000f,0.000000f,0.000000f,0.000000f,0.000000f,0.000000f,0.000000f,0.000000f,0.000000f,0.000000f,0.010309f,0.041237f,0.000000f,0.000000f,0.000000f,0.000000f,0.000000f,0.000000f,0.989691f,0.773196f,0.000000f,0.000000f,0.350515f,0.030928f,0.515464f,0.000000f,0.979381f,0.876289f,0.000000f,0.000000f,0.412371f,0.020619f,0.659794f,0.000000f,0.989583f,0.906250f,0.000000f,0.000000f,0.354167f,0.197917f,0.697917f,0.000000f,0.989691f,0.948454f,0.000000f,0.010309f,0.783505f,0.360825f,0.773196f,0.000000f,0.979381f,0.958763f,0.000000f,0.010309f,0.721649f,0.268041f,0.804124f,0.000000f,0.989691f,0.969072f,0.000000f,0.000000f,0.742268f,0.412371f,0.762887f,0.000000f,1.000000f,0.938144f,0.000000f,0.092784f,0.989691f,0.608247f,0.927835f,0.000000f,0.989362f,1.000000f,0.000000f,0.095745f,0.914894f,0.531915f,0.904255f,0.000000f,1.000000f,0.989796f,0.000000f,0.040816f,0.938776f,0.693878f,0.948980f,0.000000f,1.000000f,1.000000f,0.000000f,0.247423f,0.989691f,0.762887f,0.969072f,0.000000f,1.000000f,1.000000f,0.000000f,0.312500f,0.989583f,0.750000f,0.968750f,0.000000f,1.000000f,1.000000f,0.000000f,0.239583f,1.000000f,0.843750f,0.958333f,0.000000f,1.000000f,1.000000f,0.000000f,0.479167f,1.000000f,0.885417f,1.000000f,0.000000f,1.000000f,1.000000f,0.000000f,0.391753f,1.000000f,0.793814f,0.989691f,0.000000f,1.000000f,1.000000f,0.000000f,0.593750f,1.000000f,0.927083f,1.000000f,0.000000f,1.000000f,1.000000f,0.000000f,0.625000f,1.000000f,0.989583f,1.000000f,0.000000f,1.000000f,1.000000f,0.000000f,0.731959f,0.979381f,0.989691f,1.000000f,0.000000f,1.000000f,1.000000f,0.010417f,0.802083f,0.989583f,1.000000f,0.989583f,0.000000f,1.000000f,1.000000f,0.000000f,0.865979f,1.000000f,1.000000f,1.000000f,0.000000f,1.000000f,1.000000f,0.000000f,0.750000f,1.000000f,0.979167f,1.000000f,0.000000f,1.000000f,1.000000f,0.000000f,0.865979f,1.000000f,1.000000f,1.000000f
 		//0.000000f,0.000000f,0.000000f,0.000000f,0.000000f,0.000000f,0.000000f,0.000000f,0.000000f,0.000000f,0.000000f,0.000000f,0.000000f,0.000000f,0.000000f,0.000000f,0.000000f,0.927835f,0.742268f,0.000000f,0.000000f,0.237113f,0.000000f,0.525773f,0.000000f,0.876289f,0.804124f,0.000000f,0.000000f,0.432990f,0.000000f,0.536082f,0.000000f,0.927835f,0.886598f,0.000000f,0.000000f,0.247423f,0.092784f,0.556701f,0.000000f,0.969072f,0.896907f,0.000000f,0.010309f,0.659794f,0.226804f,0.680412f,0.000000f,0.979381f,0.958763f,0.000000f,0.020619f,0.783505f,0.144330f,0.670103f,0.000000f,0.989691f,0.917526f,0.000000f,0.000000f,0.618557f,0.134021f,0.711340f,0.000000f,1.000000f,0.979381f,0.000000f,0.030928f,0.896907f,0.711340f,0.927835f,0.000000f,0.989691f,0.989691f,0.000000f,0.030928f,0.907216f,0.494845f,0.865979f,0.000000f,0.969072f,0.979381f,0.000000f,0.030928f,0.824742f,0.536082f,0.824742f,0.000000f,0.989691f,0.989691f,0.000000f,0.134021f,0.948454f,0.752577f,0.979381f,0.000000f,1.000000f,0.989691f,0.000000f,0.195876f,0.948454f,0.670103f,1.000000f,0.000000f,1.000000f,0.989691f,0.000000f,0.144330f,0.989691f,0.804124f,0.979381f,0.000000f,1.000000f,1.000000f,0.000000f,0.309278f,1.000000f,0.865979f,1.000000f,0.000000f,1.000000f,1.000000f,0.000000f,0.422680f,1.000000f,0.711340f,1.000000f,0.000000f,1.000000f,1.000000f,0.000000f,0.247423f,0.979381f,0.752577f,0.969072f,0.000000f,1.000000f,1.000000f,0.000000f,0.412371f,1.000000f,0.783505f,1.000000f,0.000000f,1.000000f,1.000000f,0.010417f,0.479167f,1.000000f,0.927083f,1.000000f,0.000000f,0.989691f,1.000000f,0.010309f,0.567010f,0.979381f,0.989691f,1.000000f,0.000000f,1.000000f,1.000000f,0.000000f,0.546392f,1.000000f,1.000000f,1.000000f,0.000000f,1.000000f,1.000000f,0.000000f,0.541667f,1.000000f,0.989583f,1.000000f,0.000000f,1.000000f,1.000000f,0.000000f,0.474227f,0.979381f,0.958763f,1.000000f,0.000000f,1.000000f,1.000000f,0.000000f,0.541667f,1.000000f,0.989583f,1.000000f,0.000000f,1.000000f,1.000000f,0.000000f,0.505155f,0.989691f,1.000000f,1.000000f,0.000000f,1.000000f,1.000000f,0.010309f,0.463918f,1.000000f,1.000000f,1.000000f,0.000000f,1.000000f,1.000000f,0.000000f,0.577320f,1.000000f,1.000000f,1.000000f,0.000000f,1.000000f,1.000000f,0.010309f,0.546392f,1.000000f,0.969072f,1.000000f,0.000000f,1.000000f,1.000000f,0.000000f,0.639175f,1.000000f,0.989691f,1.000000f,0.000000f,1.000000f,1.000000f,0.041237f,0.742268f,1.000000f,0.979381f,1.000000f
@@ -241,10 +241,10 @@ static render_context_t* create_test_renderer()
 	//scene = scene_create_triangle();
 	//scene = scene_create_test_all(1.f);
 	
-	//cRGB_t txtCol = {1.f, 0.f, 0.f};
+	//ColorRGB txtCol = {1.f, 0.f, 0.f};
 
 	//scene = scene_create_polys(); //created from triangualtion
-	//scene = __renderer_textured_cube(render_ctx->renderer);
+	//scene = __Rendererextured_cube(render_ctx->renderer);
 	//scene = __renderer_font_quad(render_ctx->renderer);
 	//scene = scene_create_text_quad(texCache, 0.5f, 120.f, "Hallo Testwelt!!", &txtCol);
 	
@@ -334,9 +334,9 @@ static void unmap_frame(Ihandle * ih)
 
 static int render_view_zoom(float zoom)
 {
-	render_context_t * rctx = (render_context_t *)IupGetGlobal("RCTX");
-	vec3_t * from = &rctx->from;
-	vec3_t normalized;
+	RenderContext * rctx = (RenderContext *)IupGetGlobal("RCTX");
+	Vec3 * from = &rctx->from;
+	Vec3 normalized;
 	vec3_normalize_dest( &normalized, from);
 	vec3_mul(&normalized, zoom);
 	vec3_add(from, &normalized);
@@ -354,12 +354,12 @@ static int render_view_zoom_factor_changed(Ihandle * ih)
 	return IUP_DEFAULT;
 }
 
-typedef void (* VMODE_CHANGE_FN)(renderer_t* renderer);
+typedef void (* VMODE_CHANGE_FN)(Renderer* renderer);
 
 static int __renderer_change_vmode(VMODE_CHANGE_FN modechangefn)
 {
-	render_context_t * rctx = (render_context_t *)IupGetGlobal("RCTX");
-	renderer_t * renderer = rctx->renderer;
+	RenderContext * rctx = (RenderContext *)IupGetGlobal("RCTX");
+	Renderer * renderer = rctx->renderer;
 	modechangefn(renderer);
 	render_scene_again_and_refresh_canvas();
 
@@ -403,8 +403,8 @@ static Ihandle * create_render_vmode_frame() {
 static Ihandle * create_render_zoom_options_frame()
 {
 	Ihandle * zoomfactor = IupVal(IUP_HORIZONTAL);
-	render_context_t * rctx = (render_context_t *)IupGetGlobal("RCTX");
-	vec3_t * from = &rctx->from;
+	RenderContext * rctx = (RenderContext *)IupGetGlobal("RCTX");
+	Vec3 * from = &rctx->from;
 	float length = vec3_length(from);
 	IupSetFloat(zoomfactor, "MIN", 0.001f);
 	IupSetFloat(zoomfactor, "MAX", length*8);
@@ -421,13 +421,13 @@ static Ihandle * create_render_zoom_options_frame()
 	return frame;
 }
 
-typedef mat3_t * (* MATCREATE_FN)( mat3_t * dest, const float rot);
+typedef Mat3 * (* MATCREATE_FN)( Mat3 * dest, const float rot);
 
 static int render_view_rot(float rot, MATCREATE_FN matcreate  )
 {
-	mat3_t rotmat;
-	render_context_t * rctx = (render_context_t *)IupGetGlobal("RCTX");
-	vec3_t * from = &rctx->from;
+	Mat3 rotmat;
+	RenderContext * rctx = (RenderContext *)IupGetGlobal("RCTX");
+	Vec3 * from = &rctx->from;
 	(* matcreate)(&rotmat, rot);
 	mat_vec_mul_3(&rotmat, from);
 	
@@ -525,7 +525,7 @@ Ihandle* create_render_debug_cam_vecs() {
 		NULL
 	};
 
-	render_context_t * rctx = (render_context_t *)IupGetGlobal("RCTX");
+	RenderContext * rctx = (RenderContext *)IupGetGlobal("RCTX");
 	rctx->cam_from[0] = handles[5]; rctx->cam_from[1] = handles[6]; rctx->cam_from[2] = handles[7];
 	rctx->cam_to[0] = handles[9]; rctx->cam_to[1] = handles[10]; rctx->cam_to[2] = handles[11];
 	rctx->cam_forward[0] = handles[13]; rctx->cam_forward[1] = handles[14]; rctx->cam_forward[2] = handles[15];
@@ -648,7 +648,7 @@ Ihandle* create_render_debug_frustum_plane(const char *label, Ihandle** save_han
 
 Ihandle* create_render_debug_frustum()
 {
-	render_context_t * rctx = (render_context_t *)IupGetGlobal("RCTX");
+	RenderContext * rctx = (RenderContext *)IupGetGlobal("RCTX");
 
 	Ihandle* frustum_container = IupVbox(
 		create_render_debug_frustum_plane("Near", &rctx->frustum_near[0]),
@@ -668,13 +668,13 @@ Ihandle* create_render_debug_frustum()
 
 Ihandle* create_render_debug_view_frame() {
 
-	render_context_t * rctx = (render_context_t *)IupGetGlobal("RCTX");
+	RenderContext * rctx = (RenderContext *)IupGetGlobal("RCTX");
 
 	Ihandle *container = IupGridBox(
 		create_render_debug_cam_vecs(),
 		create_render_debug_cam_mat4("View Matrix", &rctx->mat4_view[0]),
 		create_render_debug_cam_mat4("Projection Matrix", &rctx->mat4_proj[0]),
-		create_render_debug_cam_mat4("Transformation Matrix", &rctx->mat4_trans[0]),
+		create_render_debug_cam_mat4("Transformation Matrix", &rctx->Mat4rans[0]),
 		NULL
 	);
 
@@ -692,7 +692,7 @@ Ihandle* create_render_debug_view_frame() {
 
 Ihandle * create_render_options()
 {
-	render_context_t * rctx = (render_context_t *)IupGetGlobal("RCTX");
+	RenderContext * rctx = (RenderContext *)IupGetGlobal("RCTX");
 
 	Ihandle *frame = IupVbox(
 		create_render_zoom_options_frame(),
@@ -725,7 +725,7 @@ static Ihandle * create__render_frame()
 
 Ihandle* create_and_show_dialog()
 {
-	render_context_t *render_ctx = create_test_renderer();
+	RenderContext *render_ctx = create_test_renderer();
 	
 	Ihandle *render_frame = create__render_frame();
 	Ihandle *render_debug_view_frame = create_render_debug_view_frame();
@@ -750,15 +750,15 @@ static void _render_init_(void * data) {
 			All needed things:
 		  */
 	#endif
-	render_ctx_t * mctx = (render_ctx_t *)data;
+	RenderCtx * mctx = (RenderCtx *)data;
 	mctx->frame=NULL;
 	
 }
 
-static void free_render_context(render_context_t **_rctx) {
+static void free_render_context(RenderContext **_rctx) {
 	
 	if (_rctx != NULL && *_rctx != NULL) {
-		render_context_t *rctx = *_rctx;
+		RenderContext *rctx = *_rctx;
 		if (rctx->renderer)  
 			renderer_free(rctx->renderer);
 		if(rctx->scene)
@@ -770,7 +770,7 @@ static void free_render_context(render_context_t **_rctx) {
 
 static void _render_free_(void * data) {
 	printf("render free\n");
-	render_context_t * rctx = (render_context_t *)IupGetGlobal("RCTX");
+	RenderContext * rctx = (RenderContext *)IupGetGlobal("RCTX");
 	free_render_context(&rctx);
 }
 
@@ -781,7 +781,7 @@ static const char * _render_name_(void * data) {
 
 void * _render_frame_(void * data) {
 	printf("render frame\n");
-	render_ctx_t * mctx = (render_ctx_t *)data;
+	RenderCtx * mctx = (RenderCtx *)data;
 	if ( mctx->frame == NULL ) {
 		printf("render frame create new\n");
 		mctx->frame = create_and_show_dialog();
@@ -807,14 +807,14 @@ void _render_cleanup_(void * data) {
 	void (*prepare)(void * data);
 	void (*cleanup)(void * data);
 */
-plugin_t * render_plugin(plugin_t * plugin) {
+Plugin * render_plugin(Plugin * plugin) {
 	plugin->name = _render_name_;
 	plugin->frame = _render_frame_;
 	plugin->init = _render_init_;
 	plugin->free = _render_free_;
 	plugin->prepare = _render_prepare_;
 	plugin->cleanup = _render_cleanup_;
-	plugin->data = malloc(sizeof(render_ctx_t));
+	plugin->data = malloc(sizeof(RenderCtx));
 	return plugin;
 }
 

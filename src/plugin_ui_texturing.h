@@ -14,7 +14,7 @@
 typedef struct {
 	Ihandle * frame;	//algorithm frame
 	void * context;		//specific algorithm data
-} texture_algorithm_t;
+} TextureAlgorithm;
 
 
 //### OLD Interface ###
@@ -31,12 +31,12 @@ typedef struct {
 
 typedef struct {
 	const char *name;
-	void (*filter)(texture_t * texture, unsigned int pxrange, float factor);
+	void (*filter)(Texture * texture, unsigned int pxrange, float factor);
 } texture_filter_t;
 
 typedef struct {
 	const char *name;
-	void (*manipulation)(texture_t * texture);
+	void (*manipulation)(Texture * texture);
 } texture_manipulation_t;
 
 typedef struct {
@@ -59,15 +59,15 @@ typedef struct _texture_ctx_ {
 } texture_ctx_t;
 
 typedef struct {
-	noise_t * noise;
-	texture_t * texture;
+	Noise * noise;
+	Texture * texture;
 	tex_algorithm_t * algorithm;
 	texture_manipulation_t *tex_manip;
 	texture_filter_t *tex_filter;
 	middle_func4_t *funcs4;
 	middle_func2_t *funcs2;
-} render_texture_context_t;
+} RenderTextureContext;
 
-plugin_t * texture_plugin(plugin_t * plugin);
+Plugin * texture_plugin(Plugin * plugin);
 
 #endif

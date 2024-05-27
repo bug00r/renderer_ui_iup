@@ -13,9 +13,9 @@ typedef struct {
 	void (*free)(void * data);
 	void (*prepare)(void * data);
 	void (*cleanup)(void * data);
-} plugin_t;
+} Plugin;
 
-plugin_t * new_plugin();
-void free_plugin(plugin_t * plugin);
+Plugin * new_plugin();
+void free_plugin(Plugin * plugin);
 
 #endif

@@ -30,7 +30,7 @@ void iup_init_app(app_t * app, app_param_t * param) {
 	
 	IupSetGlobal("UTF8MODE", "YES");
 
-	plugin_t * plugin = new_plugin(); 
+	Plugin * plugin = new_plugin(); 
 	main_plugin(plugin);
 	plugin->init(plugin->data);
 	main_ctx_t * mainctx = (main_ctx_t *)plugin->data;
@@ -57,7 +57,7 @@ bool iup_run_app(app_t * app)
 void iup_free_app(app_t * app) {
 	printf("iup app free\n");
 	app_param_t * param = app->param;
-	plugin_t *plugin = (plugin_t *)param->app_data;
+	Plugin *plugin = (Plugin *)param->app_data;
 	plugin->cleanup(plugin->data);
 	plugin->free(plugin->data);
 	IupClose();

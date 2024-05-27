@@ -49,7 +49,7 @@ void _proto_cleanup_(void * data) {
 	proto_ctx_t * mctx = (proto_ctx_t *)data;	
 }
 
-plugin_t * proto_plugin(plugin_t * plugin) {
+Plugin * proto_plugin(Plugin * plugin) {
 	plugin->name	= _proto_name_;
 	plugin->frame	= _proto_frame_;
 	plugin->init	= _proto_init_;

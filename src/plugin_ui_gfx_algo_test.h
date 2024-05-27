@@ -29,8 +29,8 @@ typedef void (*DRAW_TRIGGER) (Ihandle *handle);
 typedef struct _gfx_algo_test_ctx_ {
 	Ihandle *frame;
 	Ihandle *cur_algo;
-} gfx_algo_test_ctx_t;
+} GfxAlgoTestCtx;
 
-plugin_t * gfx_algo_test_plugin(plugin_t * plugin);
+Plugin * gfx_algo_test_plugin(Plugin * plugin);
 
 #endif
