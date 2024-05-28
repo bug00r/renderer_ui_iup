@@ -213,9 +213,9 @@ void * _gfx_algo_test_frame_(void * data) {
 	GfxAlgoTestCtx * mctx = (GfxAlgoTestCtx *)data;
 	Ihandle * frame = mctx->frame;
 	if ( mctx->frame == NULL ) {
-		archive_resource_t* ar = archive_resource_memory(&_binary_zip_resource_7z_start, (size_t)&_binary_zip_resource_7z_size);
+		ArchiveResource* ar = archive_resource_memory(&_binary_zip_resource_7z_start, (size_t)&_binary_zip_resource_7z_size);
 		
-		xml_source_t* xml_src = xml_source_from_resname(ar, "gfx_algo_test_ui");
+		XmlSource* xml_src = xml_source_from_resname(ar, "gfx_algo_test_ui");
 
 		iup_xml_builder_t *builder = iup_xml_builder_new();
 
