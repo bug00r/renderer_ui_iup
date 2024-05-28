@@ -40,7 +40,7 @@ CFLAGS+=-std=c11 -O1
 #-pg for profiling 
 
 LDFLAGS+=-L/c/dev/lib
-CFLAGS+=-I/c/dev/include -I.
+CFLAGS+=-I. -I./src -I/c/dev/include 
 
 _SRC_FILES=test_renderer_ui_iup app iup_app plugin plugin_ui_main plugin_ui_renderer plugin_ui_texturing plugin_ui_gfx_algo_test font_provider_default
 TESTSRC=$(patsubst %,src/%,$(patsubst %,%.c,$(_SRC_FILES)))
