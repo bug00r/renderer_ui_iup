@@ -217,7 +217,7 @@ void * _gfx_algo_test_frame_(void * data) {
 		
 		XmlSource* xml_src = xml_source_from_resname(ar, "gfx_algo_test_ui");
 
-		iup_xml_builder_t *builder = iup_xml_builder_new();
+		IupXmlBuilder *builder = iup_xml_builder_new();
 
 		iup_xml_builder_add_bytes(builder, "gfx_algo_test_ui",  (const char *)xml_src->src_data, *xml_src->src_size);
 
