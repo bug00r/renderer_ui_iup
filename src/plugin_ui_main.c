@@ -7,7 +7,7 @@ static void _main_init_(void * data) {
 			All needed things:
 		  */
 	#endif
-	main_ctx_t * mctx = (main_ctx_t *)data;
+	MainCtx * mctx = (MainCtx *)data;
 	mctx->cntplugins = 3;
 	mctx->plugins = malloc( mctx->cntplugins * sizeof(Plugin));
 	
@@ -32,7 +32,7 @@ static void _main_free_(void * data) {
 		/** remove all special allocated things from init method..
 		  */
 	#endif
-	main_ctx_t * mctx = (main_ctx_t *)data;
+	MainCtx * mctx = (MainCtx *)data;
 	for ( unsigned int i = mctx->cntplugins; i--;) {
 		void * plugin_data = mctx->plugins[i].data;
 		mctx->plugins[i].free(plugin_data);
@@ -108,7 +108,7 @@ static int plugin_cb(Ihandle * handle) {
 	return IUP_DEFAULT;
 }
 
-static Ihandle * create_plugin_menu(main_ctx_t * mctx) {
+static Ihandle * create_plugin_menu(MainCtx * mctx) {
 	Ihandle * pmenu = IupMenu(NULL);
 	for ( unsigned int i = 0; i < mctx->cntplugins ; ++i ) {
 		Ihandle *mitem = IupItem(mctx->plugins[i].name(NULL), NULL);
@@ -126,7 +126,7 @@ void * _main_frame_(void * data) {
 		printf("main frame\n");
 	#endif
 	
-	main_ctx_t * mctx = (main_ctx_t *)data;
+	MainCtx * mctx = (MainCtx *)data;
 	Ihandle * frame = mctx->frame;
 	if ( mctx->frame == NULL ) {
 		
@@ -170,7 +170,7 @@ void _main_prepare_(void * data) {
 	Ihandle *navtree = IupGetHandle("tree");
 	IupSetAttribute(navtree, "TITLE","System");
 	//init plugins here
-	main_ctx_t * mctx = (main_ctx_t *)data;
+	MainCtx * mctx = (MainCtx *)data;
 	for ( unsigned int i = mctx->cntplugins; i--;) {
 		IupSetAttribute(navtree, "ADDLEAF", mctx->plugins[i].name(NULL));
 	}	
@@ -179,7 +179,7 @@ void _main_prepare_(void * data) {
 
 void _main_cleanup_(void * data) {
 	printf("main plugin cleanup\n");
-	main_ctx_t * mctx = (main_ctx_t *)data;
+	MainCtx * mctx = (MainCtx *)data;
 	for ( unsigned int i = mctx->cntplugins; i--;) {
 		void * plugin_data = mctx->plugins[i].data;
 		mctx->plugins[i].cleanup(plugin_data);
@@ -193,6 +193,6 @@ Plugin * main_plugin(Plugin * plugin) {
 	plugin->free = _main_free_;
 	plugin->prepare = _main_prepare_;
 	plugin->cleanup = _main_cleanup_;
-	plugin->data = malloc(sizeof(main_ctx_t)); //here malloc
+	plugin->data = malloc(sizeof(MainCtx)); //here malloc
 	return plugin;
 }

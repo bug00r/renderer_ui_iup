@@ -30,9 +30,9 @@
 	*/
 #endif
 
-void iup_init_app(app_t * app, app_param_t * param);
-void iup_init_app_param(app_param_t * param);
-bool iup_run_app(app_t * app);
-void iup_free_app(app_t * app);
+void iup_init_app(App * app, AppParam * param);
+void iup_init_app_param(AppParam * param);
+bool iup_run_app(App * app);
+void iup_free_app(App * app);
 
 #endif

@@ -3,7 +3,7 @@
 int main(int argc, char* argv[])
 {
   srand(time(NULL));
-  app_t * app = new_app(argc, argv);
+  App * app = new_app(argc, argv);
   app->init_app_param = iup_init_app_param;
   app->init_app = iup_init_app;
   app->run_app = iup_run_app;

@@ -1,40 +1,40 @@
 #include "app.h"
 
-app_param_t * new_app_param() {
-	app_param_t * new_app_param = malloc(sizeof(app_param_t));
+AppParam * new_app_param() {
+	AppParam * new_app_param = malloc(sizeof(AppParam));
 	return new_app_param;
 }
 
-void free_app_param(app_param_t * param) {
+void free_app_param(AppParam * param) {
 	free(param);
 }
 
-static void default_init_app(app_t * app, app_param_t * param) {
+static void default_init_app(App * app, AppParam * param) {
 	printf("You not implement init_app function!!\n");
 	
 }
 
-static void default_init_app_param(app_param_t * param) {
+static void default_init_app_param(AppParam * param) {
 	printf("You not implement init_app_param function!!\n");
 }
 
-static app_param_t * default_create_app_param() {
+static AppParam * default_create_app_param() {
 	return new_app_param();
 }
 
-static bool default_run_app(app_t * app) {
+static bool default_run_app(App * app) {
 	printf("You not implement run_app function!!\n");
 	return false;
 }
 
-void free_app(app_t * app) {
+void free_app(App * app) {
 	if (app->param) 
 		free_app_param(app->param);
 	free(app);
 }
 
-app_t * new_app(int argc, char* argv[]) {
-	app_t * new_app = malloc(sizeof(app_t));
+App * new_app(int argc, char* argv[]) {
+	App * new_app = malloc(sizeof(App));
 	new_app->argc = argc;
 	new_app->argv = argv;
 	new_app->create_app_param = default_create_app_param;
@@ -46,7 +46,7 @@ app_t * new_app(int argc, char* argv[]) {
 	return new_app;
 }
 
-static bool check_app_if_valid(const app_t * app) {
+static bool check_app_if_valid(const App * app) {
 	return app->create_app_param && 
 		   app->init_app_param   &&
 		   (app->init_app_param != default_init_app_param) &&
@@ -54,9 +54,9 @@ static bool check_app_if_valid(const app_t * app) {
 		   (app->init_app != default_init_app);
 }
 
-void run_app(app_t * app) {
+void run_app(App * app) {
 	if(check_app_if_valid(app)) {
-		app_param_t * params = app->create_app_param();
+		AppParam * params = app->create_app_param();
 		app->init_app_param(params);
 		app->init_app(app, params);
 		app->param = params;	

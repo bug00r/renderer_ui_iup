@@ -22,50 +22,50 @@ typedef struct {
 typedef struct {
 	const char *name;
 	float (*middlefunc)(float x1, float x2, float x3, float x4);
-} middle_func4_t;
+} MiddleFunc4;
 
 typedef struct {
 	const char *name;
 	float (*middlefunc)(float x1, float x2);
-} middle_func2_t;
+} MiddleFunc2;
 
 typedef struct {
 	const char *name;
 	void (*filter)(Texture * texture, unsigned int pxrange, float factor);
-} texture_filter_t;
+} TextureFilter;
 
 typedef struct {
 	const char *name;
 	void (*manipulation)(Texture * texture);
-} texture_manipulation_t;
+} TextureManipulation;
 
 typedef struct {
 	const char *name;
 	float complex c;
-} julia_c_t;
+} JuliaC;
 
 typedef struct {
 	const char *name;
 	float complex (*func)(const float complex *cp, const float complex *c);
-} julia_polyfunc_t;
+} JuliaPolyFunc;
 
 typedef struct {
 	const char *name;
 	void (*func)(void);
-} tex_algorithm_t;
+} TexAlgorithm;
 
 typedef struct _texture_ctx_ {
 	Ihandle *frame;
-} texture_ctx_t;
+} TextureCtx;
 
 typedef struct {
 	Noise * noise;
 	Texture * texture;
-	tex_algorithm_t * algorithm;
-	texture_manipulation_t *tex_manip;
-	texture_filter_t *tex_filter;
-	middle_func4_t *funcs4;
-	middle_func2_t *funcs2;
+	TexAlgorithm * algorithm;
+	TextureManipulation *tex_manip;
+	TextureFilter *tex_filter;
+	MiddleFunc4 *funcs4;
+	MiddleFunc2 *funcs2;
 } RenderTextureContext;
 
 Plugin * texture_plugin(Plugin * plugin);

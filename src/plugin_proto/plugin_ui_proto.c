@@ -7,7 +7,7 @@ static void _proto_init_(void * data) {
 			All needed things:
 		  */
 	#endif
-	proto_ctx_t * mctx = (proto_ctx_t *)data;
+	ProtoCtx * mctx = (ProtoCtx *)data;
 	
 	mctx->frame=NULL;
 }
@@ -17,7 +17,7 @@ static void _proto_free_(void * data) {
 		/** remove all special allocated things from init method..
 		  */
 	#endif
-	proto_ctx_t * mctx = (proto_ctx_t *)data;
+	ProtoCtx * mctx = (ProtoCtx *)data;
 	free(mctx);
 }
 
@@ -31,7 +31,7 @@ void * _proto_frame_(void * data) {
 		printf("main frame\n");
 	#endif
 	
-	proto_ctx_t * mctx = (proto_ctx_t *)data;
+	ProtoCtx * mctx = (ProtoCtx *)data;
 	Ihandle * frame = mctx->frame;
 	if ( mctx->frame == NULL ) {
 	
@@ -42,11 +42,11 @@ void * _proto_frame_(void * data) {
 
 void _proto_prepare_(void * data) {
 	//init plugins here
-	proto_ctx_t * mctx = (proto_ctx_t *)data;
+	ProtoCtx * mctx = (ProtoCtx *)data;
 }
 
 void _proto_cleanup_(void * data) {
-	proto_ctx_t * mctx = (proto_ctx_t *)data;	
+	ProtoCtx * mctx = (ProtoCtx *)data;	
 }
 
 Plugin * proto_plugin(Plugin * plugin) {
@@ -56,6 +56,6 @@ Plugin * proto_plugin(Plugin * plugin) {
 	plugin->free 	= _proto_free_;
 	plugin->prepare = _proto_prepare_;
 	plugin->cleanup = _proto_cleanup_;
-	plugin->data 	= malloc(sizeof(proto_ctx_t)); //here malloc
+	plugin->data 	= malloc(sizeof(ProtoCtx)); //here malloc
 	return plugin;
 }

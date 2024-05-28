@@ -67,7 +67,7 @@ static void process_texture_ds() {
 	Ihandle * m_list = IupGetHandle("texture_middle4_list");
 	int middle = IupGetInt(m_list, "VALUE");
 	if ( --middle >= 0 ) {
-		middle_func4_t * middlef = &rtctx->funcs4[middle];
+		MiddleFunc4 * middlef = &rtctx->funcs4[middle];
 		if (middlef->name && middlef->middlefunc) {
 			ds_param.middlefunc = middlef->middlefunc;
 		}
@@ -100,7 +100,7 @@ static void process_texture_md() {
 	Ihandle * m_list = IupGetHandle("texture_middle4_list");
 	int middle = IupGetInt(m_list, "VALUE");
 	if ( --middle >= 0 ) {
-		middle_func4_t * middlef = &rtctx->funcs4[middle];
+		MiddleFunc4 * middlef = &rtctx->funcs4[middle];
 		if (middlef->name && middlef->middlefunc) {
 			md_param.middlefunc = middlef->middlefunc;
 		}
@@ -109,7 +109,7 @@ static void process_texture_md() {
 	m_list = IupGetHandle("texture_middle2_list");
 	middle = IupGetInt(m_list, "VALUE");
 	if ( --middle >= 0 ) {
-		middle_func2_t * middlef2 = &rtctx->funcs2[middle];
+		MiddleFunc2 * middlef2 = &rtctx->funcs2[middle];
 		if (middlef2->name && middlef2->middlefunc) {
 			md_param.middlefunc2 = middlef2->middlefunc;
 		}
@@ -129,7 +129,7 @@ void create_texture()
 	
 	if ( --algorithm >= 0 ) {
 		RenderTextureContext * rtctx = (RenderTextureContext *)IupGetGlobal("RTCTX");
-		tex_algorithm_t * algo = &rtctx->algorithm[algorithm];
+		TexAlgorithm * algo = &rtctx->algorithm[algorithm];
 		if (algo->name && algo->func) {
 			algo->func();
 			Noise * noise = rtctx->noise;
@@ -140,7 +140,7 @@ void create_texture()
 			Ihandle * m_list = IupGetHandle("texture_filter_list");
 			int item = IupGetInt(m_list, "VALUE");
 			if ( --item >= 0 ) {
-				texture_filter_t * filter = &rtctx->tex_filter[item];
+				TextureFilter * filter = &rtctx->tex_filter[item];
 				if (filter->name && filter->filter) {
 					unsigned int mediancross = IupGetInt(IupGetHandle("mediancross"), "VALUE");
 					float arithfactor = IupGetFloat(IupGetHandle("arithfactor"), "VALUE");
@@ -152,7 +152,7 @@ void create_texture()
 			m_list = IupGetHandle("texture_manipulation_list");
 			item = IupGetInt(m_list, "VALUE");
 			if ( --item >= 0 ) {
-				texture_manipulation_t * manip = &rtctx->tex_manip[item];
+				TextureManipulation * manip = &rtctx->tex_manip[item];
 				if (manip->name && manip->manipulation) {
 					manip->manipulation(texture);
 				}
@@ -398,7 +398,7 @@ static void _texture_init_(void * data) {
 			All needed things:
 		  */
 	#endif
-	texture_ctx_t * mctx = (texture_ctx_t *)data;
+	TextureCtx * mctx = (TextureCtx *)data;
 	mctx->frame=NULL;
 	
 	RenderTextureContext * rtctx = malloc(sizeof(RenderTextureContext));
@@ -408,52 +408,52 @@ static void _texture_init_(void * data) {
 	rtctx->noise = noise_new(w, h);
 	
 	int size = 4;
-	rtctx->algorithm = malloc(size * sizeof(tex_algorithm_t));
-	rtctx->algorithm[--size] = (tex_algorithm_t){NULL,NULL};
-	rtctx->algorithm[--size] = (tex_algorithm_t){"Diamond Square", process_texture_ds};
-	rtctx->algorithm[--size] = (tex_algorithm_t){"Midpoint Displacement", process_texture_md};
-	rtctx->algorithm[--size] = (tex_algorithm_t){"- no selection -",NULL};
+	rtctx->algorithm = malloc(size * sizeof(TexAlgorithm));
+	rtctx->algorithm[--size] = (TexAlgorithm){NULL,NULL};
+	rtctx->algorithm[--size] = (TexAlgorithm){"Diamond Square", process_texture_ds};
+	rtctx->algorithm[--size] = (TexAlgorithm){"Midpoint Displacement", process_texture_md};
+	rtctx->algorithm[--size] = (TexAlgorithm){"- no selection -",NULL};
 	
 	size = 3;
-	rtctx->tex_manip = malloc(size * sizeof(texture_manipulation_t));
-	rtctx->tex_manip[--size] = (texture_manipulation_t){NULL,NULL};
-	rtctx->tex_manip[--size] = (texture_manipulation_t){"Brightness and Contrast",texture_manipulation_brigthness_contrast};
-	rtctx->tex_manip[--size] = (texture_manipulation_t){"- no selection -",NULL};
+	rtctx->tex_manip = malloc(size * sizeof(TextureManipulation));
+	rtctx->tex_manip[--size] = (TextureManipulation){NULL,NULL};
+	rtctx->tex_manip[--size] = (TextureManipulation){"Brightness and Contrast",texture_manipulation_brigthness_contrast};
+	rtctx->tex_manip[--size] = (TextureManipulation){"- no selection -",NULL};
 
 	size = 8;
-	rtctx->tex_filter = malloc(size * sizeof(texture_filter_t));
-	rtctx->tex_filter[--size] = (texture_filter_t){NULL,NULL};
-	rtctx->tex_filter[--size] = (texture_filter_t){"filter_gauss",filter_gaussian};
-	rtctx->tex_filter[--size] = (texture_filter_t){"filter_middle_arith",filter_middle_arith};
-	rtctx->tex_filter[--size] = (texture_filter_t){"filter_middle_median_box",filter_middle_median_box};
-	rtctx->tex_filter[--size] = (texture_filter_t){"filter_middle_median_cross",filter_middle_median_cross};
-	rtctx->tex_filter[--size] = (texture_filter_t){"filter_middle_median_diag_cross",filter_middle_median_diag_cross};
-	rtctx->tex_filter[--size] = (texture_filter_t){"filter_middle_cubic_box",filter_middle_cubic_box};
-	rtctx->tex_filter[--size] = (texture_filter_t){"- no selection -",NULL};
+	rtctx->tex_filter = malloc(size * sizeof(TextureFilter));
+	rtctx->tex_filter[--size] = (TextureFilter){NULL,NULL};
+	rtctx->tex_filter[--size] = (TextureFilter){"filter_gauss",filter_gaussian};
+	rtctx->tex_filter[--size] = (TextureFilter){"filter_middle_arith",filter_middle_arith};
+	rtctx->tex_filter[--size] = (TextureFilter){"filter_middle_median_box",filter_middle_median_box};
+	rtctx->tex_filter[--size] = (TextureFilter){"filter_middle_median_cross",filter_middle_median_cross};
+	rtctx->tex_filter[--size] = (TextureFilter){"filter_middle_median_diag_cross",filter_middle_median_diag_cross};
+	rtctx->tex_filter[--size] = (TextureFilter){"filter_middle_cubic_box",filter_middle_cubic_box};
+	rtctx->tex_filter[--size] = (TextureFilter){"- no selection -",NULL};
 	
 	size = 10;
-	rtctx->funcs4 = malloc(size * sizeof(middle_func4_t));
-	rtctx->funcs4[--size] = (middle_func4_t){NULL,NULL};
-	rtctx->funcs4[--size] = (middle_func4_t){"middle_hoelder",middle_hoelder};
-	rtctx->funcs4[--size] = (middle_func4_t){"middle_geometric",middle_geometric};
-	rtctx->funcs4[--size] = (middle_func4_t){"middle_cubic",middle_cubic};
-	rtctx->funcs4[--size] = (middle_func4_t){"middle_quad",middle_quad};
-	rtctx->funcs4[--size] = (middle_func4_t){"middle_median",middle_median};
-	rtctx->funcs4[--size] = (middle_func4_t){"middle_quantil",middle_quantil};
-	rtctx->funcs4[--size] = (middle_func4_t){"middle_harmonic",middle_harmonic};
-	rtctx->funcs4[--size] = (middle_func4_t){"middle_arithmetic",middle_arithmetic};
-    rtctx->funcs4[--size] = (middle_func4_t){"- no selection -",NULL};
+	rtctx->funcs4 = malloc(size * sizeof(MiddleFunc4));
+	rtctx->funcs4[--size] = (MiddleFunc4){NULL,NULL};
+	rtctx->funcs4[--size] = (MiddleFunc4){"middle_hoelder",middle_hoelder};
+	rtctx->funcs4[--size] = (MiddleFunc4){"middle_geometric",middle_geometric};
+	rtctx->funcs4[--size] = (MiddleFunc4){"middle_cubic",middle_cubic};
+	rtctx->funcs4[--size] = (MiddleFunc4){"middle_quad",middle_quad};
+	rtctx->funcs4[--size] = (MiddleFunc4){"middle_median",middle_median};
+	rtctx->funcs4[--size] = (MiddleFunc4){"middle_quantil",middle_quantil};
+	rtctx->funcs4[--size] = (MiddleFunc4){"middle_harmonic",middle_harmonic};
+	rtctx->funcs4[--size] = (MiddleFunc4){"middle_arithmetic",middle_arithmetic};
+    rtctx->funcs4[--size] = (MiddleFunc4){"- no selection -",NULL};
 	
 	size = 8;
-	rtctx->funcs2 = malloc(size * sizeof(middle_func2_t));
-	rtctx->funcs2[--size] = (middle_func2_t){NULL,NULL};
-	rtctx->funcs2[--size] = (middle_func2_t){"middle_hoelder",middle_hoelder2};
-	rtctx->funcs2[--size] = (middle_func2_t){"middle_geometric",middle_geometric2};
-	rtctx->funcs2[--size] = (middle_func2_t){"middle_cubic",middle_cubic2};
-	rtctx->funcs2[--size] = (middle_func2_t){"middle_quad",middle_quad2};
-	rtctx->funcs2[--size] = (middle_func2_t){"middle_harmonic",middle_harmonic2};
-	rtctx->funcs2[--size] = (middle_func2_t){"middle_arithmetic",middle_arithmetic2};
-	rtctx->funcs2[--size] = (middle_func2_t){"- no selection -",NULL};
+	rtctx->funcs2 = malloc(size * sizeof(MiddleFunc2));
+	rtctx->funcs2[--size] = (MiddleFunc2){NULL,NULL};
+	rtctx->funcs2[--size] = (MiddleFunc2){"middle_hoelder",middle_hoelder2};
+	rtctx->funcs2[--size] = (MiddleFunc2){"middle_geometric",middle_geometric2};
+	rtctx->funcs2[--size] = (MiddleFunc2){"middle_cubic",middle_cubic2};
+	rtctx->funcs2[--size] = (MiddleFunc2){"middle_quad",middle_quad2};
+	rtctx->funcs2[--size] = (MiddleFunc2){"middle_harmonic",middle_harmonic2};
+	rtctx->funcs2[--size] = (MiddleFunc2){"middle_arithmetic",middle_arithmetic2};
+	rtctx->funcs2[--size] = (MiddleFunc2){"- no selection -",NULL};
 	
 	IupSetGlobal("RTCTX", (void*)rtctx); 
 }
@@ -471,7 +471,7 @@ static void _texture_free_(void * data) {
 		free(rtctx->funcs2);
 		free(rtctx);
 	}
-	texture_ctx_t * mctx = (texture_ctx_t *)data;
+	TextureCtx * mctx = (TextureCtx *)data;
 	free(mctx);
 }
 
@@ -482,7 +482,7 @@ static const char * _texture_name_(void * data) {
 
 void * _texture_frame_(void * data) {
 	printf("texture frame\n");
-	texture_ctx_t * mctx = (texture_ctx_t *)data;
+	TextureCtx * mctx = (TextureCtx *)data;
 	Ihandle * frame = mctx->frame;
 	if ( mctx->frame == NULL ) {
 		printf("texture frame create new\n");
@@ -552,6 +552,6 @@ Plugin * texture_plugin(Plugin * plugin) {
 	plugin->free = _texture_free_;
 	plugin->prepare = _texture_prepare_;
 	plugin->cleanup = _texture_cleanup_;
-	plugin->data = malloc(sizeof(texture_ctx_t)); //here malloc
+	plugin->data = malloc(sizeof(TextureCtx)); //here malloc
 	return plugin;
 }
